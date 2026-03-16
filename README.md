@@ -1,1 +1,3 @@
 # Eltex homework
+
+some changes
