@@ -1,0 +1,94 @@
+
+#2. Создайте иерархию вложенных каталогов D1/D2/D3.
+
+eltex-pg2-v1@eltex-2026-spring-18:16> mkdir -p D1/D2/D3
+
+#3. В каталоге D2 создайте обычный пустой файл file.txt.
+
+eltex-pg2-v1@eltex-2026-spring-18:16> touch D1/D2/file.txt
+
+#4. Добавьте произвольный текст в файл file.txt
+
+eltex-pg2-v1@eltex-2026-spring-18:17> echo 'random text tralala' > D1/D2/file.txt
+
+#5. В каталоге D3 создайте символическую и жесткие ссылки на file.txt.
+
+eltex-pg2-v1@eltex-2026-spring-18:25> ln D1/D2/file.txt D1/D2/D3/hard-file
+eltex-pg2-v1@eltex-2026-spring-18:25> ln -s ~/D1/D2/file.txt D1/D2/D3/sym-file
+
+#6 Докажите, что ссылки созданы успешно
+
+eltex-pg2-v1@eltex-2026-spring-18:29> cat D1/D2/file.txt
+random text tralala
+eltex-pg2-v1@eltex-2026-spring-18:29> cat D1/D2/D3/hard-file
+random text tralala
+eltex-pg2-v1@eltex-2026-spring-18:44> cat D1/D2/D3/sym-file
+random text tralala
+
+#7. Переместите файл file.txt в каталог D1
+
+eltex-pg2-v1@eltex-2026-spring-18:44> mv D1/D2/file.txt D1/
+
+#8. Проверьте работу ранее созданных ссылок на файл file.txt. Какая ссылка оказалась рабочей и почему?
+#> При создании жесткой ссылки создается новое имя для того же самого файла, поэтому она остается рабочей.
+#> Cимволическая ссылка ломается потому что теперь ссылается на пустое место.
+
+eltex-pg2-v1@eltex-2026-spring-18:45> cat D1/D2/D3/hard-file
+random text tralala
+eltex-pg2-v1@eltex-2026-spring-21:58> cat D1/D2/D3/sym-file
+cat: D1/D2/D3/sym-file: No such file or directory
+
+#9. Удалите каталог D2 со всем содержимым
+
+eltex-pg2-v1@eltex-2026-spring-22:01> rm -r D1/D2
+eltex-pg2-v1@eltex-2026-spring-22:01> ls D1/
+file.txt
+
+#10. Найдите все файлы в системе размером больше 20МБ. Убедитесь в том (du), что найденные
+файлы имеют нужный размер. Запишите в файл $USER_part3_gt50M.log список найденных
+файлов.
+
+eltex-pg2-v1@eltex-2026-spring-22:16> find / -size +10M > eltex-pg2-v1_part3_gt50M.log 2>/dev/null
+eltex-pg2-v1@eltex-2026-spring-22:18> head eltex-pg2-v1_part3_gt50M.log
+/usr/bin/x86_64-linux-gnu-lto-dump-12
+/usr/lib/modules/6.1.0-43-amd64/kernel/drivers/gpu/drm/amd/amdgpu/amdgpu.ko
+/usr/lib/modules/6.1.0-40-amd64/kernel/drivers/gpu/drm/amd/amdgpu/amdgpu.ko
+/usr/lib/udev/hwdb.bin
+/usr/lib/gcc/x86_64-linux-gnu/12/lto1
+/usr/lib/gcc/x86_64-linux-gnu/12/cc1
+/usr/lib/x86_64-linux-gnu/libx265.so.199
+/usr/lib/x86_64-linux-gnu/libicudata.so.72.1
+/sys/devices/pci0000:00/0000:00:02.0/resource0_wc
+/sys/devices/pci0000:00/0000:00:02.0/resource0
+
+#11 В домашнем каталоге и его подкаталогах найдите обычные файлы, которые
+# были изменены в течение последних 24х часов.
+
+eltex-pg2-v1@eltex-2026-spring-22:24> find . -type f -mtime -1
+./.viminfo
+./eltex-pg2-v1_part3_gt50M.log
+./.lesshst
+./D1/file.txt
+./bashlog.sh
+./eltex-pg2-v1_part.log.bak
+./.bash_history
+./eltex-pg2-v1_part3.log
+
+#13. В каком каталоге находится команда find?
+
+eltex-pg2-v1@eltex-2026-spring-22:26> where find
+bash: where: command not found
+eltex-pg2-v1@eltex-2026-spring-22:30> find / -name find 2>/dev/null
+/usr/bin/find
+/usr/share/bash-completion/completions/find
+
+#14. Определите характер содержимого файла find командой file.
+
+eltex-pg2-v1@eltex-2026-spring-22:31> file /usr/bin/find
+/usr/bin/find: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=5545a6c7162d325fbe5ffabcbfe4e5521b66ce70, for GNU/Linux 3.2.0, stripped
+
+#15. Установите, к какому типу относятся файлы /boot/initrd.img*.
+
+eltex-pg2-v1@eltex-2026-spring-22:31> file /boot/initrd.img-6.1.0-40-amd64 /boot/initrd.img-6.1.0-43-amd64
+/boot/initrd.img-6.1.0-40-amd64: ASCII cpio archive (SVR4 with no CRC)
+/boot/initrd.img-6.1.0-43-amd64: ASCII cpio archive (SVR4 with no CRC)

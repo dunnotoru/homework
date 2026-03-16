@@ -1,0 +1,207 @@
+#1. Запустить сессию, создать файл 
+eltex-pg2-v1@eltex-2026-spring:~$ screen -S `whoami`_part2
+eltex-pg2-v1@eltex-2026-spring:~$ touch ${USER}_part.log
+
+#2. С помощью механизма дополнения имен команд выведите все команды, которые начинаются на «ls».
+eltex-pg2-v1@eltex-2026-spring:~$ ls
+ls           lsblk        lscpu        lsinitramfs  lsirq        lslogins     lsmod        lsof         lsusb        
+lsattr       lsb_release  lsfd         lsipc        lslocks      lsmem        lsns         lspci
+
+#3. С помощью механизма дополнения имен переменных выведите все переменные, которые начинаются с «HIST».
+eltex-pg2-v1@eltex-2026-spring:~$ $HIST
+$HISTCMD       $HISTCONTROL   $HISTFILE      $HISTFILESIZE  $HISTSIZE 
+
+#4. Узнайте, сколько команд может храниться в файле истории.
+eltex-pg2-v1@eltex-2026-spring:~$ echo $HISTSIZE 
+1000
+
+#5. Выведите имена файлов и каталогов из домашнего каталога, которые
+начинаются с «.».
+eltex-pg2-v1@eltex-2026-spring:~$ find ~/ -maxdepth 1 -name ".*"
+/home/eltex-pg2-v1/.viminfo
+/home/eltex-pg2-v1/.config
+/home/eltex-pg2-v1/.profile
+/home/eltex-pg2-v1/.lesshst
+/home/eltex-pg2-v1/.bash_logout
+/home/eltex-pg2-v1/.local
+/home/eltex-pg2-v1/.bashrc.save
+/home/eltex-pg2-v1/.bash_history
+/home/eltex-pg2-v1/.bashrc
+/home/eltex-pg2-v1/.eltex-pg2-v1_part.log.swp
+
+#6. Настройте вывод даты выполнения команд, хранящихся в истории.
+eltex-pg2-v1@eltex-2026-spring:~$ HISTTIMEFORMAT='[%d-%m-%Y] - '
+eltex-pg2-v1@eltex-2026-spring:~$ history 1
+  737  [07-03-2026] - history 1
+
+#7. Настройте автоматическое сохранение набираемых команд в файле
+истории.
+eltex-pg2-v1@eltex-2026-spring:~$ date 
+Sat Mar  7 01:23:57 AM +07 2026
+eltex-pg2-v1@eltex-2026-spring:~$ history 5
+  741  [07-03-2026] - history 5
+  742  [07-03-2026] - tail ~/.bashrc
+  743  [07-03-2026] - clear
+  744  [07-03-2026] - date 
+  745  [07-03-2026] - history 5
+eltex-pg2-v1@eltex-2026-spring:~$ tail ~/.bash_history 
+nano ~/.bashrc 
+ls
+$HISTSIZE 
+exit
+ls
+qweqwe
+exit
+ls
+error
+exit
+eltex-pg2-v1@eltex-2026-spring:~$ PROMPT_COMMAND='history > ~/.bash_history'
+eltex-pg2-v1@eltex-2026-spring:~$ date
+Sat Mar  7 01:27:21 AM +07 2026
+eltex-pg2-v1@eltex-2026-spring:~$ history 5
+  746  [07-03-2026] - tail ~/.bash_history 
+  747  [07-03-2026] - PROMPT_COMMAND='`history` > ~/bash_history'
+  748  [07-03-2026] - PROMPT_COMMAND='history > ~/.bash_history'
+  749  [07-03-2026] - date
+  750  [07-03-2026] - history 5
+eltex-pg2-v1@eltex-2026-spring:~$ tail ~/.bash_history 
+  741  [07-03-2026] - history 5
+  742  [07-03-2026] - tail ~/.bashrc
+  743  [07-03-2026] - clear
+  744  [07-03-2026] - date 
+  745  [07-03-2026] - history 5
+  746  [07-03-2026] - tail ~/.bash_history 
+  747  [07-03-2026] - PROMPT_COMMAND='`history` > ~/bash_history'
+  748  [07-03-2026] - PROMPT_COMMAND='history > ~/.bash_history'
+  749  [07-03-2026] - date
+  750  [07-03-2026] - history 5
+
+#10. Создайте переменную DATE, в которую запишите текущую дату. Проверьте содержимое переменной.
+eltex-pg2-v1@eltex-2026-spring:~$ DATE=`date +"%d-%m-%Y"`
+eltex-pg2-v1@eltex-2026-spring:~$ echo $DATE
+07-03-2026
+
+#11. Создайте переменную TIME, в которую запишите текущее время. Проверьте содержимое переменной.
+eltex-pg2-v1@eltex-2026-spring:~$ TIME=`date +"%H:%M:%S"`
+eltex-pg2-v1@eltex-2026-spring:~$ echo $TIME
+01:29:49
+
+#12. Создайте переменную DATE_TIME в которую поместите значения из
+переменных DATE и TIME, разделенных пробелом. Проверьте содержимое переменной.
+eltex-pg2-v1@eltex-2026-spring:~$ DATE_TIME=$DATE\ $TIME
+eltex-pg2-v1@eltex-2026-spring:~$ echo $DATE_TIME
+07-03-2026 01:29:49
+
+#13. Выведите имена файлов, содержащие хотя бы одну цифру, из каталогов /bin и /sbin.
+eltex-pg2-v1@eltex-2026-spring:~$ find /sbin/ /bin/ -maxdepth 1 -type f -name '*[0-9]*'
+/sbin/dumpe2fs
+/sbin/e2fsck
+/sbin/e2freefrag
+/sbin/e2undo
+/sbin/e2scrub_all
+/sbin/tune2fs
+/sbin/e2image
+/sbin/e4defrag
+/sbin/mke2fs
+/sbin/e4crypt
+/sbin/killall5
+/sbin/e2scrub
+/sbin/resize2fs
+/bin/pod2html
+/bin/python3.11
+/bin/ssh-argv0
+/bin/c99-gcc
+/bin/x86_64-linux-gnu-gcc-ar-12
+/bin/base64
+/bin/x86_64-linux-gnu-gcc-ranlib-12
+/bin/enc2xs
+/bin/x86_64-linux-gnu-gcov-12
+/bin/pod2usage
+/bin/x86_64-linux-gnu-objdump
+/bin/sha224sum
+/bin/x86_64-linux-gnu-objcopy
+/bin/bzip2
+/bin/x86_64-linux-gnu-readelf
+/bin/x86_64-linux-gnu-ar
+/bin/grub-mkpasswd-pbkdf2
+/bin/md5sum
+/bin/bzip2recover
+/bin/grub-menulst2cfg
+/bin/x86_64-linux-gnu-cpp-12
+/bin/x86_64-linux-gnu-size
+/bin/x86_64-linux-gnu-gprofng
+/bin/x86_64-linux-gnu-gprof
+/bin/h2xs
+/bin/x86_64-linux-gnu-ranlib
+/bin/x86_64-linux-gnu-ld.gold
+/bin/x86_64-linux-gnu-as
+/bin/pod2text
+/bin/x86_64-linux-gnu-nm
+/bin/x86_64-linux-gnu-elfedit
+/bin/x86_64-linux-gnu-strip
+/bin/x86_64-linux-gnu-gcc-nm-12
+/bin/perl5.36.0
+/bin/x86_64-linux-gnu-ld.bfd
+/bin/pydoc3.11
+/bin/x86_64-linux-gnu-gcov-tool-12
+/bin/b2sum
+/bin/x86_64-linux-gnu-lto-dump-12
+/bin/pod2man
+/bin/sha1sum
+/bin/c89-gcc
+/bin/pl2pm
+/bin/h2ph
+/bin/x86_64-linux-gnu-c++filt
+/bin/sha512sum
+/bin/x86_64-linux-gnu-gcc-12
+/bin/x86_64-linux-gnu-gp-display-src
+/bin/base32
+/bin/x86_64-linux-gnu-gp-collect-app
+/bin/cpan5.36-x86_64-linux-gnu
+/bin/x86_64-linux-gnu-gp-archive
+/bin/sha384sum
+/bin/py3clean
+/bin/x86_64-linux-gnu-gcov-dump-12
+/bin/perl5.36-x86_64-linux-gnu
+/bin/x86_64-linux-gnu-strings
+/bin/x86_64-linux-gnu-gp-display-html
+/bin/pygettext3.11
+/bin/systemd-id128
+/bin/x86_64-linux-gnu-dwp
+/bin/bunzip2
+/bin/x86_64-linux-gnu-gp-display-text
+/bin/x86_64-linux-gnu-addr2line
+/bin/py3compile
+/bin/grub-syslinux2cfg
+/bin/diff3
+/bin/sha256sum
+
+#14. Измените приглашение так, чтобы выводились имя хоста, имя пользователя и
+время: имя_пользователя@имя_хоста-HH:MM> (Используйте переменные
+bash и команду date)
+eltex-pg2-v1@eltex-2026-spring:~$ PS1='${USER}@${HOSTNAME}-`date +"%H:%M"`> '
+
+#15. Сделайте так, чтобы в запускаемом интерпретаторе bash выводилось
+приглашение, установленное в родительском интерпретаторе bash.
+eltex-pg2-v1@eltex-2026-spring-02:22> echo "PS1='${PS1}'" >>~/.bashrc
+eltex-pg2-v1@eltex-2026-spring-02:22> tail ~/.bashrc
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+PS1='${USER}@${HOSTNAME}-`date +"%H:%M"`> '
+eltex-pg2-v1@eltex-2026-spring-02:23> bash
+eltex-pg2-v1@eltex-2026-spring-02:23>
+
+#16. Одной командной строкой создайте в домашнем каталоге подкаталоги для
+каждого месяца текущего года вида YYYY-MM(год реализуйте с помощью
+команды date и командной подстановки).
+eltex-pg2-v1@eltex-2026-spring-02:31> for m in {1..12}; do mkdir `date +"%Y"`-`printf '%02d' $m`; done
+eltex-pg2-v1@eltex-2026-spring-02:31> ls
+2026-01  2026-03  2026-05  2026-07  2026-09  2026-11  clear.sh               filter       report_part1.txt
+2026-02  2026-04  2026-06  2026-08  2026-10  2026-12  eltex-pg2-v1_part.log  filteredlog  test
