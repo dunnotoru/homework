@@ -1,0 +1,280 @@
+root@eltex-practice2-pg2-v1-12:03> touch practice2_${MYUSER}_part3.log
+
+#2. установить параметры с учетными данными
+
+root@eltex-practice2-pg2-v1-12:08> git config --global user.name "dunnotoru"
+root@eltex-practice2-pg2-v1-12:08> git config --global user.email "dunnotoru@yandex.ru"
+root@eltex-practice2-pg2-v1-12:09> git config --global init.defaultBranch main
+
+#3. Установите непосредственно программу git и набор утилит для управления github из командной строки gh
+
+root@eltex-practice2-pg2-v1-12:09> apt update
+root@eltex-practice2-pg2-v1-12:10> apt install gh
+
+#4. Создайте ключ ssh
+
+root@eltex-practice2-pg2-v1-12:10> ssh-keygen -t ed25519 -f ~/.ssh/dunnotoru
+Generating public/private ed25519 key pair.
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/dunnotoru
+Your public key has been saved in /root/.ssh/dunnotoru.pub
+The key fingerprint is:
+SHA256:H3PdC4Dqk/CayT+1N/7U1Z8Ihm9yItnzsmIidtU1H4I root@eltex-practice2-pg2-v1
+The key's randomart image is:
++--[ED25519 256]--+
+|                 |
+|          .      |
+|         ...     |
+|        .E.+.o ..|
+|     . .S.+o=.o +|
+|      +.++o+..+ =|
+|      .B.=o+ o +.|
+|   o.o++ooBo.    |
+|  . o=+.o.=oo.   |
++----[SHA256]-----+
+
+#5. Подключите этот комьютер к githu:
+
+root@eltex-practice2-pg2-v1-12:15> gh auth login
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations on this host? SSH
+? Upload your SSH public key to your GitHub account? /root/.ssh/dunnotoru.pub
+? Title for your SSH key: eltex-practice2-pg2-v1
+? How would you like to authenticate GitHub CLI? Login with a web browser
+
+! First copy your one-time code: 17C7-951C
+Press Enter to open github.com in your browser... 
+! Failed opening a web browser at https://github.com/login/device
+  exec: "xdg-open,x-www-browser,www-browser,wslview": executable file not found in $PATH
+  Please try entering the URL in your browser manually
+
+✓ Authentication complete.
+- gh config set -h github.com git_protocol ssh
+✓ Configured git protocol
+! Authentication credentials saved in plain text
+✓ Uploaded the SSH key to your GitHub account: /root/.ssh/dunnotoru.pub
+✓ Logged in as dunnotoru
+
+#6. Укажите автоматическую авторизацию только для сайта github.com
+
+oot@eltex-practice2-pg2-v1-12:29> gh auth setup-git --hostname github.com
+
+#7. Убедиться, что все в порядке
+
+root@eltex-practice2-pg2-v1-12:30> gh auth status
+github.com
+  ✓ Logged in to github.com account dunnotoru (/root/.config/gh/hosts.yml)
+  - Active account: true
+  - Git operations protocol: ssh
+  - Token: gho_************************************
+  - Token scopes: 'admin:public_key', 'gist', 'read:org', 'repo'
+
+#8. Создаем репозиторий
+
+oot@eltex-practice2-pg2-v1-12:30> gh repo create --public homework
+✓ Created repository dunnotoru/homework on GitHub
+  https://github.com/dunnotoru/homework
+
+#9. Наполняем
+
+root@eltex-practice2-pg2-v1-14:00> mkdir ~/homework && cd ~/homework
+root@eltex-practice2-pg2-v1-14:01> echo '# Eltex homework' >> README.md
+root@eltex-practice2-pg2-v1-14:07> git init
+Initialized empty Git repository in /root/homework/.git/
+root@eltex-practice2-pg2-v1-14:07> git add README.md 
+root@eltex-practice2-pg2-v1-14:07> git status
+On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+        new file:   README.md
+
+root@eltex-practice2-pg2-v1-14:07> git commit -m "first commit"
+[main (root-commit) a47ae81] first commit
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README.md
+root@eltex-practice2-pg2-v1-14:07> git branch -M main
+root@eltex-practice2-pg2-v1-14:08> git remote add origin https://github.com/dunnotoru/homework.git
+root@eltex-practice2-pg2-v1-14:09> git status
+On branch main
+nothing to commit, working tree clean
+root@eltex-practice2-pg2-v1-14:09> git push -u origin main
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 223 bytes | 223.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/dunnotoru/homework.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+
+# Копируем с 1-го сервера
+eltex-pg2-v1@eltex-2026-spring-21:18> scp ./* root@172.16.9.201:/root/homework/
+Enter passphrase for key '/home/eltex-pg2-v1/.ssh/id_rsa': 
+eltex-pg2-v1_part3_gt50M.log                         100% 1185     2.9MB/s   00:00    
+eltex-pg2-v1_part3.log                               100% 4446     7.4MB/s   00:00    
+eltex-pg2-v1_part.log                                100% 7935    14.6MB/s   00:00    
+report_part1.txt                                     100%  130   408.6KB/s   00:00
+
+root@eltex-practice2-pg2-v1-14:19> mv report_part1.txt module1/task1/
+root@eltex-practice2-pg2-v1-14:20> mv eltex-pg2-v1_part module1/task2/
+root@eltex-practice2-pg2-v1-14:20> mv eltex-pg2-v1_part.log module1/task2/
+root@eltex-practice2-pg2-v1-14:20> mv eltex-pg2-v1_part3.log module1/task3/
+root@eltex-practice2-pg2-v1-14:21> mv eltex-pg2-v1_part3_gt50M.log module1/task3/
+root@eltex-practice2-pg2-v1-15:10> mv practice1_part1.pdf task1/
+root@eltex-practice2-pg2-v1-15:10> l
+task1/  task2/  task3/
+root@eltex-practice2-pg2-v1-15:10> find ./
+./
+./task2
+./task2/eltex-pg2-v1_part.log
+./task1
+./task1/report_part1.txt
+./task1/practice1_part1.pdf
+./task3
+./task3/eltex-pg2-v1_part3_gt50M.log
+./task3/eltex-pg2-v1_part3.log
+
+root@eltex-practice2-pg2-v1-15:18> git add .
+root@eltex-practice2-pg2-v1-15:18> git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   task1/practice1_part1.pdf
+        new file:   task1/report_part1.txt
+        new file:   task2/eltex-pg2-v1_part.log
+        new file:   task3/eltex-pg2-v1_part3.log
+        new file:   task3/eltex-pg2-v1_part3_gt50M.log
+
+root@eltex-practice2-pg2-v1-15:19> git commit -m "add practice1"
+[main 8ac8bbb] add practice1
+ 5 files changed, 324 insertions(+)
+ create mode 100644 module1/task1/practice1_part1.pdf
+ create mode 100644 module1/task1/report_part1.txt
+ create mode 100644 module1/task2/eltex-pg2-v1_part.log
+ create mode 100644 module1/task3/eltex-pg2-v1_part3.log
+ create mode 100644 module1/task3/eltex-pg2-v1_part3_gt50M.log
+root@eltex-practice2-pg2-v1-15:19> git push
+Enumerating objects: 12, done.
+Counting objects: 100% (12/12), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (10/10), done.
+Writing objects: 100% (11/11), 1.36 MiB | 1.73 MiB/s, done.
+Total 11 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/dunnotoru/homework.git
+   a47ae81..8ac8bbb  main -> main
+
+#10. Клонируйте ваш репозиторий
+
+root@eltex-practice2-pg2-v1-15:25> mkdir homework_clone
+root@eltex-practice2-pg2-v1-15:25> cd homework_clone/
+root@eltex-practice2-pg2-v1-15:25> git clone https://github.com/dunnotoru/homework.git .
+Cloning into '.'...
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (14/14), done.
+remote: Compressing objects: 100% (11/11), done.
+remote: Total 14 (delta 0), reused 14 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (14/14), 1.36 MiB | 2.41 MiB/s, done.
+root@eltex-practice2-pg2-v1-15:25> l
+module1/  README.md
+
+#11. Внесите изменение в основном каталоге, не забыв про git add/commit/push, выполните в каталоге с клоном
+
+root@eltex-practice2-pg2-v1-15:30> echo 'some changes' >> README.md 
+root@eltex-practice2-pg2-v1-15:30> cat README.md 
+# Eltex homework
+
+some changes
+
+# Оригинальная директория
+root@eltex-practice2-pg2-v1-15:31> pwd
+/root/homework
+root@eltex-practice2-pg2-v1-15:31> git add . 
+root@eltex-practice2-pg2-v1-15:32> git commit -m "add some changes"
+[main 017bb86] add some changes
+ 1 file changed, 2 insertions(+)
+root@eltex-practice2-pg2-v1-15:32> git push
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 301 bytes | 301.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/dunnotoru/homework.git
+   8ac8bbb..017bb86  main -> main
+
+# Клон
+root@eltex-practice2-pg2-v1-15:25> pwd
+/root/homework_clone
+root@eltex-practice2-pg2-v1-15:31> git fetch
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 0), reused 3 (delta 0), pack-reused 0 (from 0)
+Unpacking objects: 100% (3/3), 281 bytes | 281.00 KiB/s, done.
+From https://github.com/dunnotoru/homework
+   8ac8bbb..017bb86  main       -> origin/main
+root@eltex-practice2-pg2-v1-15:33> git log origin/main
+commit 017bb865197509d8e0d9417c0e04ef0e76d1c432 (origin/main, origin/HEAD)
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 15:32:20 2026 +0000
+
+    add some changes
+
+commit 8ac8bbb770b64e827d466b5602b527e443067e4a (HEAD -> main)
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 15:19:40 2026 +0000
+
+    add practice1
+
+commit a47ae811bc65e543d04391f4fac25584aa2a1fee
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 14:07:58 2026 +0000
+
+    first commit
+
+root@eltex-practice2-pg2-v1-15:33> git diff main origin/main
+diff --git a/README.md b/README.md
+index ede2cfd..a0f4ddd 100644
+--- a/README.md
++++ b/README.md
+@@ -1 +1,3 @@
+ # Eltex homework
++
++some changes
+root@eltex-practice2-pg2-v1-15:33> git merge
+Updating 8ac8bbb..017bb86
+Fast-forward
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+root@eltex-practice2-pg2-v1-15:34> git log
+commit 017bb865197509d8e0d9417c0e04ef0e76d1c432 (HEAD -> main, origin/main, origin/HEAD)
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 15:32:20 2026 +0000
+
+    add some changes
+
+commit 8ac8bbb770b64e827d466b5602b527e443067e4a
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 15:19:40 2026 +0000
+
+    add practice1
+
+commit a47ae811bc65e543d04391f4fac25584aa2a1fee
+Author: dunnotoru <dunnotoru@yandex.ru>
+Date:   Mon Mar 16 14:07:58 2026 +0000
+
+    first commit
+
+root@eltex-practice2-pg2-v1-15:41> pwd
+/root/homework_clone
+root@eltex-practice2-pg2-v1-15:41> cat README.md 
+# Eltex homework
+
+some changes
+
+

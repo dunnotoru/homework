@@ -1,0 +1,440 @@
+
+
+eltex-pg2-v1@eltex-2026-spring-17:27> touch practice2_eltex-pg2-v1_part1.log
+
+#1. Создайте на сервере для 1 практики ключ ssh при помощи программы ssh-keygen
+
+eltex-pg2-v1@eltex-2026-spring-17:27> ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/eltex-pg2-v1/.ssh/id_rsa): Created directory '/home/eltex-pg2-v1/.ssh'.
+Your identification has been saved in /home/eltex-pg2-v1/.ssh/id_rsa
+Your public key has been saved in /home/eltex-pg2-v1/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:T3YyW7t8JPKQc/ucrHw8iNjxSNhNwWhoNcChezm1Fpg eltex-pg2-v1@eltex-2026-spring
+The key's randomart image is:
++---[RSA 3072]----+
+|       .o=oo     |
+|       .+oo.o    |
+|      ..E.o  .   |
+|       . o o.    |
+|      . SoB+o    |
+|       ..*O*+..  |
+|         +o@.*   |
+|        . +o=+=. |
+|            ===. |
++----[SHA256]-----+
+
+#2. Скопируйте созданный ключ на сервер для 2 практики для пользователя root при помощи
+программы ssh-copy-id
+
+eltex-pg2-v1@eltex-2026-spring-17:34> ssh-copy-id root@172.16.9.201
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/eltex-pg2-v1/.ssh/id_rsa.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'root@172.16.9.201'"
+and check to make sure that only the key(s) you wanted were added.
+
+#3. Подключитесь к серверу для 2 практики под пользователем root и сравните содержимое файла
+открытого ключа на сервере 1 ~/.ssh/*.pub и файла ~/.ssh/authorized_keys на сервере для 2
+практики, а так же права доступа для каждого из файлов
+eltex-pg2-v1@eltex-2026-spring-17:41> ssh root@172.16.9.201
+Welcome to Ubuntu 24.04.2 LTS (GNU/Linux 6.8.0-55-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Mar 12 10:41:59 AM UTC 2026
+
+  System load:  0.67               Processes:              118
+  Usage of /:   38.3% of 14.66GB   Users logged in:        0
+  Memory usage: 6%                 IPv4 address for ens18: 172.16.9.201
+  Swap usage:   0%
+
+
+Expanded Security Maintenance for Applications is not enabled.
+
+233 updates can be applied immediately.
+149 of these updates are standard security updates.
+To see these additional updates run: apt list --upgradable
+
+Enable ESM Apps to receive additional future security updates.
+See https://ubuntu.com/esm or run: sudo pro status
+
+Last login: Thu Mar 12 10:36:23 2026 from 172.16.8.4
+
+#СРАВНЕНИЕ КЛЮЧЕЙ
+
+eltex-pg2-v1@eltex-2026-spring-17:36> cat .ssh/id_rsa.pub
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2dyNhp/aaHX1J3tjr7PzNTjqqZAg1c2rvDz7WZwiUwx7XTZtGMYUI71MKXbewVtNMCx0FzdPRixzs6+5ZPIrBvWH9qvviMMRj6KkCjddDAmTwt77GQ2R3OWW/lyDRhbuLSxiJjrXDN1yADK9PxyY75g60/VnA2LaK1mPvfzLJtFcl8wsMesg6qizgKaQtyJ4FZi8nYR0IVkOp5Ax3Nk0Ccy5uGAv680+rJH6hcvb68tbs4s03bxY3V3+HfWk1VaiX5TK/bl2F/ty8AWeascjg1JSUkX/yBFr3l00oPAHYVenKpaODeFAlNMCt+yt5Xb6byEEU3Ndz3GifhK14rw5zqgNu8iDxZGCbJywAQYINDQzmPFjU/CLMjeTQlk9R/7gnUz9JWvoOkAyiVT6/PK+FfTYpRmRnsvOd4zRrHXhH4DwDGisgkJj+CJa3yICagfo9l0Z6RLa+typfxOya5NcJ/vwPpFKWvHNdgA25u8wvHyUy/zYE6ZJbSh4eG9+zfWE= eltex-pg2-v1@eltex-2026-spring
+
+root@eltex-practice2-pg2-v1:~# cat ~/.ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2dyNhp/aaHX1J3tjr7PzNTjqqZAg1c2rvDz7WZwiUwx7XTZtGMYUI71MKXbewVtNMCx0FzdPRixzs6+5ZPIrBvWH9qvviMMRj6KkCjddDAmTwt77GQ2R3OWW/lyDRhbuLSxiJjrXDN1yADK9PxyY75g60/VnA2LaK1mPvfzLJtFcl8wsMesg6qizgKaQtyJ4FZi8nYR0IVkOp5Ax3Nk0Ccy5uGAv680+rJH6hcvb68tbs4s03bxY3V3+HfWk1VaiX5TK/bl2F/ty8AWeascjg1JSUkX/yBFr3l00oPAHYVenKpaODeFAlNMCt+yt5Xb6byEEU3Ndz3GifhK14rw5zqgNu8iDxZGCbJywAQYINDQzmPFjU/CLMjeTQlk9R/7gnUz9JWvoOkAyiVT6/PK+FfTYpRmRnsvOd4zRrHXhH4DwDGisgkJj+CJa3yICagfo9l0Z6RLa+typfxOya5NcJ/vwPpFKWvHNdgA25u8wvHyUy/zYE6ZJbSh4eG9+zfWE= eltex-pg2-v1@eltex-2026-spring
+
+eltex-pg2-v1@eltex-2026-spring-17:37> ll
+total 12
+-rw------- 1 eltex-pg2-v1 eltex-pg2-v1 2675 Mar 12 17:29 id_rsa
+-rw-r--r-- 1 eltex-pg2-v1 eltex-pg2-v1  584 Mar 12 17:29 id_rsa.pub
+-rw------- 1 eltex-pg2-v1 eltex-pg2-v1  284 Mar 12 17:34 known_hosts
+
+root@eltex-practice2-pg2-v1:~/.ssh# ll
+total 12
+drwx------ 2 root root 4096 Mar 12  2025 ./
+drwx------ 4 root root 4096 Mar 12 10:36 ../
+-rw------- 1 root root  584 Mar 12 10:34 authorized_keys
+
+#4. Создайте пользователя user1 при помощи команды useradd, укажите необходимость создания
+#домашнего каталога и shell /bin/bash. Создайте пароль пользователю user1
+
+root@eltex-practice2-pg2-v1-10:58> useradd user1 --create-home --shell /bin/bash
+root@eltex-practice2-pg2-v1-10:59> passwd user1
+New password: 
+Retype new password: 
+passwd: password updated successfully
+root@eltex-practice2-pg2-v1-11:05> tail -n 1 /etc/passwd
+user1:x:1001:1001::/home/user1:/bin/bash
+
+#5. Создайте пользователя user2 и user3 при помощи команды adduser
+
+root@eltex-practice2-pg2-v1-11:07> useradd user2
+root@eltex-practice2-pg2-v1-11:08> useradd user3
+root@eltex-practice2-pg2-v1-11:08> tail -n 3 /etc/passwd
+user1:x:1001:1001::/home/user1:/bin/bash
+user2:x:1002:1002::/home/user2:/bin/sh
+user3:x:1003:1003::/home/user3:/bin/sh
+
+#6. Для пользователя user3 смените shell на /usr/sbin/nologin (man usermod), выполните вход под
+# этим пользователем при помощи утилиты su, сначала без дополнительных параметров, затем с
+# явным указанием shell /bin/bash в параметрах su. Выполните logout
+
+root@eltex-practice2-pg2-v1-11:12> usermod --shell /usr/sbin/nologin user3
+root@eltex-practice2-pg2-v1-11:13> su user3
+This account is currently not available.
+root@eltex-practice2-pg2-v1-11:16> su --shell /bin/bash user3
+does it work?
+/bin/bash
+
+root@eltex-practice2-pg2-v1-11:16> logout
+
+#7. Создайте новую группу и добавьте её для всех пользователей user* как дополнительную,
+#посмотрите список групп всех пользователей user*
+
+root@eltex-practice2-pg2-v1-11:30> groupadd radiohead
+root@eltex-practice2-pg2-v1-11:32> usermod -a -G radiohead user1
+root@eltex-practice2-pg2-v1-11:32> usermod -a -G radiohead user2
+root@eltex-practice2-pg2-v1-11:32> usermod -a -G radiohead user3
+root@eltex-practice2-pg2-v1-11:33> groups user1 user2 user3
+user1 : user1 radiohead
+user2 : user2 radiohead
+user3 : user3 radiohead
+root@eltex-practice2-pg2-v1-11:35>
+
+#9. Создайте каталог /opt/share и назначьте группу из предыдущего пункта его владельцем,
+#установите на этот каталог бит SGID, права для группы rwx.
+
+root@eltex-practice2-pg2-v1-11:36> mkdir /opt/share
+root@eltex-practice2-pg2-v1-11:38> ll /opt/share
+total 8
+drwxr-xr-x 2 root root 4096 Mar 12 11:36 ./
+drwxr-xr-x 3 root root 4096 Mar 12 11:36 ../
+root@eltex-practice2-pg2-v1-11:41> chown :radiohead /opt/share
+root@eltex-practice2-pg2-v1-11:41> ll /opt/share
+total 8
+drwxr-xr-x 2 root radiohead 4096 Mar 12 11:36 ./
+drwxr-xr-x 3 root root      4096 Mar 12 11:36 ../
+root@eltex-practice2-pg2-v1-11:44> ls -ld /opt/share
+drwxr-xr-x 2 root radiohead 4096 Mar 12 11:36 /opt/share
+root@eltex-practice2-pg2-v1-11:45> chmod g+s /opt/share
+root@eltex-practice2-pg2-v1-11:45> chmod g+rwx /opt/share
+root@eltex-practice2-pg2-v1-11:45> ls -ld /opt/share
+drwxrwsr-x 2 root radiohead 4096 Mar 12 11:36 /opt/share
+
+#10. Для user1 задайте перманентно umask, снимающий право чтения для «прочих»
+
+root@eltex-practice2-pg2-v1-17:48> echo 'umask 004' >> /home/user1/.profile
+
+#11. Создайте каждым из пользователей новые файлы в каталоге /opt/share, удалите файлы 
+#созданные другими пользователями
+
+user1@eltex-practice2-pg2-v1:~$ log touch /opt/share/user1file
+
+root@eltex-practice2-pg2-v1-17:57> exec su user2
+$ echo $SHELL
+/bin/sh
+$ whoami
+user2
+$ touch /opt/share/user2file
+
+user3@eltex-practice2-pg2-v1:/root$ touch /opt/share/user3file
+
+root@eltex-practice2-pg2-v1-18:02> ls -la
+total 8
+drwxrwsr-x 2 root  radiohead 4096 Mar 15 18:01 .
+drwxr-xr-x 3 root  root      4096 Mar 12 11:36 ..
+-rw-rw-r-- 1 user1 radiohead    0 Mar 15 17:55 user1file
+-rw-rw-r-- 1 user2 radiohead    0 Mar 15 17:58 user2file
+-rw-rw-r-- 1 user3 radiohead    0 Mar 15 18:01 user3file
+root@eltex-practice2-pg2-v1-18:02> rm user1file 
+root@eltex-practice2-pg2-v1-18:02> ls
+user2file  user3file
+root@eltex-practice2-pg2-v1-18:02> rm user*
+
+#12 Повторите предыдущий пункт, предварительно установив sticky bit на каталоге /opt/share
+
+root@eltex-practice2-pg2-v1-18:08> chmod +t /opt/share
+root@eltex-practice2-pg2-v1-18:09> ls /opt/share
+root@eltex-practice2-pg2-v1-18:10> ls -a /opt/share
+.  ..
+root@eltex-practice2-pg2-v1-18:10> ls -la /opt/share
+total 8
+drwxrwsr-t 2 root radiohead 4096 Mar 15 18:03 .
+drwxr-xr-x 3 root root      4096 Mar 12 11:36 ..
+
+root@eltex-practice2-pg2-v1-18:10> touch /opt/share/rootfile
+root@eltex-practice2-pg2-v1-18:12> su user1
+user1@eltex-practice2-pg2-v1:/root$ touch /opt/share/user1file
+user1@eltex-practice2-pg2-v1:/root$ exit
+exit
+root@eltex-practice2-pg2-v1-18:13> su user2
+$ touch /opt/share/user2file
+$ exit
+root@eltex-practice2-pg2-v1-18:13> su --shell /bin/bash user3
+user3@eltex-practice2-pg2-v1:/root$ touch /opt/share/user3file
+user3@eltex-practice2-pg2-v1:/root$ exit
+exit
+root@eltex-practice2-pg2-v1-18:13> ls -la /opt/share
+total 8
+drwxrwsr-t 2 root  radiohead 4096 Mar 15 18:13 .
+drwxr-xr-x 3 root  root      4096 Mar 12 11:36 ..
+-rw-r--r-- 1 root  radiohead    0 Mar 15 18:12 rootfile
+-rw-rw-r-- 1 user1 radiohead    0 Mar 15 18:12 user1file
+-rw-rw-r-- 1 user2 radiohead    0 Mar 15 18:13 user2file
+-rw-rw-r-- 1 user3 radiohead    0 Mar 15 18:13 user3file
+
+root@eltex-practice2-pg2-v1-18:13> su user1
+user1@eltex-practice2-pg2-v1:/root$ cd /opt/share
+user1@eltex-practice2-pg2-v1:/opt/share$ ls
+rootfile  user1file  user2file  user3file
+user1@eltex-practice2-pg2-v1:/opt/share$ ls -la
+total 8
+drwxrwsr-t 2 root  radiohead 4096 Mar 15 18:13 .
+drwxr-xr-x 3 root  root      4096 Mar 12 11:36 ..
+-rw-r--r-- 1 root  radiohead    0 Mar 15 18:12 rootfile
+-rw-rw-r-- 1 user1 radiohead    0 Mar 15 18:12 user1file
+-rw-rw-r-- 1 user2 radiohead    0 Mar 15 18:13 user2file
+-rw-rw-r-- 1 user3 radiohead    0 Mar 15 18:13 user3file
+user1@eltex-practice2-pg2-v1:/opt/share$ rm user2file 
+rm: cannot remove 'user2file': Operation not permitted
+user1@eltex-practice2-pg2-v1:/opt/share$ rm user3file 
+rm: cannot remove 'user3file': Operation not permitted
+
+#13. Разрешите user1 выполнять привилегированную команду dmesg при помощи команды sudo, а
+#user2 – при помощи скрипта на языке bash с установленным флагом SUID
+
+user1@eltex-practice2-pg2-v1:/root$ sudo dmesg
+[sudo] password for user1: 
+user1 is not in the sudoers file.
+
+# Добавляем в sudoers через visudo 
+user1  ALL=(ALL:ALL) /bin/dmesg
+
+user1@eltex-practice2-pg2-v1:/root$ sudo dmesg | head
+[    0.000000] Linux version 6.8.0-55-generic (buildd@lcy02-amd64-095) (x86_64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #57-Ubuntu SMP PREEMPT_DYNAMIC Wed Feb 12 23:42:21 UTC 2025 (Ubuntu 6.8.0-55.57-generic 6.8.12)
+[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-6.8.0-55-generic root=/dev/mapper/ubuntu--vg-ubuntu--lv ro
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000]   Hygon HygonGenuine
+[    0.000000]   Centaur CentaurHauls
+[    0.000000]   zhaoxin   Shanghai  
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+
+# При этом user1 может только dmesg выполнить через sudo 
+user1@eltex-practice2-pg2-v1:/root$ sudo ls
+Sorry, user user1 is not allowed to execute '/usr/bin/ls' as root on eltex-practice2-pg2-v1.
+
+# User2 изначально не умеет так(
+user2@eltex-practice2-pg2-v1:~$ echo 'dmesg | tail' > ~/rundmesg.sh
+user2@eltex-practice2-pg2-v1:~$ ls -la
+total 12
+drwxr-xr-x 2 user2 user2 4096 Mar 15 19:15 .
+drwxr-xr-x 5 root  root  4096 Mar 15 19:11 ..
+-rw-rw-r-- 1 user2 user2   13 Mar 15 19:15 rundmesg.sh
+user2@eltex-practice2-pg2-v1:~$ chmod u+x rundmesg.sh 
+user2@eltex-practice2-pg2-v1:~$ ./rundmesg.sh 
+dmesg: read kernel buffer failed: Operation not permitted
+
+# Можно сделать обертку на C и выставить suid бит исполняемому файлу
+user2@eltex-practice2-pg2-v1:~$ cat rundmesg.c
+#include <unistd.h>
+#include <stdlib.h>
+
+int main() {
+  setuid(0);
+  seteuid(0);
+  system("dmesg");
+}
+
+user2@eltex-practice2-pg2-v1:~$ ./rundmesg | head 
+[    0.000000] Linux version 6.8.0-55-generic (buildd@lcy02-amd64-095) (x86_64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #57-Ubuntu SMP PREEMPT_DYNAMIC Wed Feb 12 23:42:21 UTC 2025 (Ubuntu 6.8.0-55.57-generic 6.8.12)
+[    0.000000] Command line: BOOT_IMAGE=/vmlinuz-6.8.0-55-generic root=/dev/mapper/ubuntu--vg-ubuntu--lv ro
+[    0.000000] KERNEL supported cpus:
+[    0.000000]   Intel GenuineIntel
+[    0.000000]   AMD AuthenticAMD
+[    0.000000]   Hygon HygonGenuine
+[    0.000000]   Centaur CentaurHauls
+[    0.000000]   zhaoxin   Shanghai  
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+
+# ИЛИ можно выставить suid bit на сам /bin/bash и запустить с privileged ключом 
+root@eltex-practice2-pg2-v1-10:47> chmod +s /bin/bash
+user2@eltex-practice2-pg2-v1:~$ bash -p ./rundmesg.sh
+1002
+0
+[530070.380505] audit: type=1400 audit(1773834163.179:828): apparmor="DENIED" operation="mknod" class="file" profile="ubuntu_pro_esm_cache" name="/usr/lib/python3/dist-packages/uaclient/__pycache__/system.cpython-312.pyc.125900781068336" pid=73774 comm="python3" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+[530070.387622] audit: type=1400 audit(1773834163.186:829): apparmor="DENIED" operation="mknod" class="file" profile="ubuntu_pro_esm_cache" name="/usr/lib/python3/dist-packages/uaclient/__pycache__/exceptions.cpython-312.pyc.125900781514288" pid=73774 comm="python3" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+[530070.392337] audit: type=1400 audit(1773834163.191:830): apparmor="DENIED" operation="mknod" class="file" profile="ubuntu_pro_esm_cache" name="/usr/lib/python3/dist-packages/uaclient/messages/__pycache__/__init__.cpython-312.pyc.125900780289328" pid=73774 comm="python3" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+[530070.393169] audit: type=1400 audit(1773834163.192:831): apparmor="DENIED" operation="mknod" class="file" profile="ubuntu_pro_esm_cache" name="/usr/lib/python3/dist-packages/uaclient/messages/__pycache__/urls.cpython-312.pyc.125900780289328" pid=73774 comm="python3" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+[597484.297452] kauditd_printk_skb: 89 callbacks suppressed
+[597484.297461] audit: type=1400 audit(1773901578.308:921): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="/usr/lib/snapd/snap-confine" pid=78043 comm="apparmor_parser"
+[597484.303230] audit: type=1400 audit(1773901578.314:922): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="/usr/lib/snapd/snap-confine//mount-namespace-capture-helper" pid=78043 comm="apparmor_parser"
+[597487.844150] loop0: detected capacity change from 0 to 8
+[597487.907184] audit: type=1400 audit(1773901581.918:923): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="/usr/lib/snapd/snap-confine" pid=78252 comm="apparmor_parser"
+[597487.913132] audit: type=1400 audit(1773901581.924:924): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="/usr/lib/snapd/snap-confine//mount-namespace-capture-helper" pid=78252 comm="apparmor_parser"
+
+
+#14. Для всех пользователей user* задайте время действия пароля – 10 дней.
+
+root@eltex-practice2-pg2-v1-08:00> passwd -x 10 user1
+passwd: password changed.
+root@eltex-practice2-pg2-v1-08:01> passwd -x 10 user2
+passwd: password changed.
+root@eltex-practice2-pg2-v1-08:01> passwd -x 10 user3
+passwd: password changed.
+
+#15. Отредактируйте файл /etc/motd, вписав туда свое имя и фамилию
+
+root@eltex-practice2-pg2-v1-08:08> echo 'Матвеев Данил' >> /etc/motd
+root@eltex-practice2-pg2-v1-08:08> cat /etc/motd
+Матвеев Данил
+
+# При логине через ssh как раз пишет в конце
+*** System restart required ***
+Матвеев Данил
+Last login: Mon Mar 16 07:51:32 2026 from 172.16.8.4
+
+#16. Создайте копию содержимого каталога /etc в каталог /root/etc_backup при помощи программы rcync
+
+root@eltex-practice2-pg2-v1-08:21> rsync -r /etc/ /root/etc_backup/ | tail
+skipping non-regular file "systemd/user/sockets.target.wants/dirmngr.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/gpg-agent-browser.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/gpg-agent-extra.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/gpg-agent-ssh.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/gpg-agent.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/keyboxd.socket"
+skipping non-regular file "systemd/user/sockets.target.wants/pk-debconf-helper.socket"
+skipping non-regular file "systemd/user/timers.target.wants/launchpadlib-cache-clean.timer"
+skipping non-regular file "update-motd.d/50-landscape-sysinfo"
+skipping non-regular file "xdg/systemd/user"
+
+#17. Заархивируйте содержимое каталога /root/etc_backup архиватором tar, используйте алгоритмы
+#сжатия gzip, bzip2, 7zip, сравните размеры полученных файлов
+
+root@eltex-practice2-pg2-v1-08:37> tar -czf etc_backup.tar.gz etc_backup/
+root@eltex-practice2-pg2-v1-08:38> sudo apt-get install bzip2
+root@eltex-practice2-pg2-v1-08:38> tar -cjf etc_backup.tar.bz etc_backup/
+root@eltex-practice2-pg2-v1-08:39> sudo apt-get install 7zip
+
+# Тут немного время отличается, потому что на этапе распаковки я обнаружил, что tar.7z почему-то пустой
+# Поэтому пришлось обратно вернуться повторить, со старым motd до добавления времени.
+root@eltex-practice2-pg2-v1-09:34> tar -cf etc_backup.tar etc_backup/
+root@eltex-practice2-pg2-v1-09:34> 7z a etc_backup.tar.7z etc_backup.tar
+
+7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov : 2023-06-20
+ 64-bit locale=en_US.UTF-8 Threads:2 OPEN_MAX:1024
+
+Scanning the drive:
+1 file, 3143680 bytes (3070 KiB)
+
+Creating archive: etc_backup.tar.7z
+
+Add new data to archive: 1 file, 3143680 bytes (3070 KiB)
+
+    
+Files read from disk: 1
+Archive size: 473925 bytes (463 KiB)
+Everything is Ok
+
+drwxr-xr-x 109 root root 4.0K Mar 16 09:04 etc_backup
+-rw-r--r--   1 root root 3.0M Mar 16 08:41 etc_backup.tar
+-rw-r--r--   1 root root 463K Mar 16 09:34 etc_backup.tar.7z
+-rw-r--r--   1 root root 535K Mar 16 08:38 etc_backup.tar.bz
+-rw-r--r--   1 root root 563K Mar 16 08:59 etc_backup.tar.gz
+
+#18. Отредактируйте файл /etc/motd, вписав туда текущую дату и время, синхронизируйте каталог
+#/root/etc_backup с каталогом /etc при помощи rsync, добавьте файл motd в архив, сжатый gzip
+
+root@eltex-practice2-pg2-v1-08:52> echo '16.03.2026 15:52' >> /etc/motd
+root@eltex-practice2-pg2-v1-08:52> cat /etc/motd 
+Матвеев Данил
+16.03.2026 15:52
+
+root@eltex-practice2-pg2-v1-08:53> rsync -r /etc/ /root/etc_backup
+root@eltex-practice2-pg2-v1-08:54> cat etc_backup/motd
+Матвеев Данил
+16.03.2026 15:52
+
+root@eltex-practice2-pg2-v1-08:58> tar -czf etc_backup.tar.gz etc_backup
+
+root@eltex-practice2-pg2-v1-09:19> tar -xjf etc_backup.tar.bz -C etc_backup_bzip2
+root@eltex-practice2-pg2-v1-09:19> diff -r etc_backup etc_backup_bzip2/etc_backup/
+diff -r etc_backup/motd etc_backup_bzip2/etc_backup/motd
+2d1
+< 16.03.2026 15:52
+
+#20. Распакуйте архивы etc_backup, упакованные gzip и 7zip в каталоги /root/etc_backup_gzip и
+#/root/etc_backup_7zip, сравните программой diff файлы motd в этих каталогах.
+
+root@eltex-practice2-pg2-v1-09:21> mkdir etc_backup_gzip
+root@eltex-practice2-pg2-v1-09:21> tar -xzf etc_backup.tar.gz -C etc_backup_gzip
+
+root@eltex-practice2-pg2-v1-09:21> mkdir etc_backup_7zip
+root@eltex-practice2-pg2-v1-09:36> 7z x etc_backup.tar.7z -o./etc_backup_7z
+
+7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov : 2023-06-20
+ 64-bit locale=en_US.UTF-8 Threads:2 OPEN_MAX:1024
+
+Scanning the drive for archives:
+1 file, 473925 bytes (463 KiB)
+
+Extracting archive: etc_backup.tar.7z
+--
+Path = etc_backup.tar.7z
+Type = 7z
+Physical Size = 473925
+Headers Size = 138
+Method = LZMA2:3m
+Solid = -
+Blocks = 1
+
+Everything is Ok
+
+Size:       3143680
+Compressed: 473925
+
+root@eltex-practice2-pg2-v1-09:37> cd etc_backup_7z
+root@eltex-practice2-pg2-v1-09:38> ls
+etc_backup.tar
+root@eltex-practice2-pg2-v1-09:38> tar -xf etc_backup.tar 
+root@eltex-practice2-pg2-v1-09:38> l
+etc_backup/  etc_backup.tar
+
+root@eltex-practice2-pg2-v1-09:39> cd ~
+root@eltex-practice2-pg2-v1-09:39> diff etc_backup_gzip/etc_backup/motd etc_backup_7z/etc_backup/motd
+2d1
+< 16.03.2026 15:52
