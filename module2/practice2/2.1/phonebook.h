@@ -16,7 +16,7 @@ typedef struct Contact {
   char* position;
 
   int numbers_size;
-  char (* phone_numbers)[NUMBERS_SIZE];
+  char * phone_numbers[NUMBERS_SIZE];
 } Contact;
 
 typedef struct ContactStorage {
@@ -31,7 +31,6 @@ void delete_storage(ContactStorage* storage);
 size_t get_size(ContactStorage *storage);
 
 void add_contact(ContactStorage* storage, Contact* contact);
-void NewFunction(ContactStorage * storage);
 Contact* get_contact(const ContactStorage* storage, int id);
 Contact* remove_contact(ContactStorage* storage, int id);
 

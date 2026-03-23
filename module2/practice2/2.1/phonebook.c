@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+void update_value(Contact* c, char key, const char* value);
+
 ContactStorage* create_storage(size_t capacity) {
   ContactStorage* storage = malloc(sizeof(ContactStorage));
   storage->array = calloc(capacity, sizeof(Contact*));
@@ -38,7 +40,6 @@ void add_contact(ContactStorage* storage, Contact* contact) {
 }
 
 Contact* remove_contact(ContactStorage* storage, int id) {
-  // TODO: make get_contact also return id for removal (mb internal)
   Contact* c = get_contact(storage, id);
   if (c == NULL) {
     return NULL;
@@ -76,9 +77,10 @@ Contact* create_contact(const char* firstname, const char* lastname,
     return NULL;
   }
 
-  // TODO: check malloc result not null
-
-  Contact* c = malloc(sizeof(Contact));
+  Contact* c = calloc(1, sizeof(Contact));
+  if (c == NULL) {
+    return NULL;
+  }
 
   size_t size = strlen(firstname);
   c->firstname = calloc(size + 1, sizeof(char));
@@ -88,51 +90,42 @@ Contact* create_contact(const char* firstname, const char* lastname,
   c->lastname = calloc(size + 1, sizeof(char));
   strcpy(c->lastname, lastname);
 
+  c->middlename = NULL;
   c->job = NULL;
   c->position = NULL;
-  c->phone_numbers = NULL;
   c->id = -1;
 
   if (data_format == NULL) {
     return c;
   }
 
-  update_contact(c, data_format);
+  va_list args;
+  va_start(args, data_format);
+  size_t format_size = strlen(data_format);
+  printf("format size: %d \n", format_size);
+
+  for (size_t i = 0; i < format_size; i++) {
+    char* value = va_arg(args, char*);
+    printf("%d %s\n", i, value);
+    update_value(c, data_format[i], value);
+  }
+
+  va_end(args);
   return c;
 }
 
-int update_contact(Contact* contact, const char* data_format, ...) {
-  if (data_format == NULL || contact == NULL) {
+int update_contact(Contact* c, const char* data_format, ...) {
+  if (data_format == NULL || c == NULL) {
     return 0;
   }
 
-  contact->middlename = "doevich";
-  contact->job = "eltex";
-  contact->position = "CEO";
-
-  return 3;
-
   va_list args;
-
   va_start(args, data_format);
+  size_t format_size = strlen(data_format);
 
-  char ch;
-  char prc = 0;
-  ch = data_format[0];
-  size_t size = strlen(data_format);
-  for (size_t i = 0; ch != '\0' && size < size; i++) {
-    ch = data_format[i];
-    switch (ch) {
-      case 'f':
-      case 'l':
-      case 'm':
-      case 'j':
-      case 'p':
-        char* val = va_arg(args, char*);
-        break;
-      default:
-        break;
-    }
+  for (size_t i = 0; i < format_size; i++) {
+    char* value = va_arg(args, char*);
+    update_value(c, data_format[i], value);
   }
 
   va_end(args);
@@ -149,5 +142,39 @@ void delete_contact(Contact* contact) {
     free(contact->phone_numbers[i]);
   }
 
-  free(contact->phone_numbers);
+  for (size_t i = 0; i < 5; i++) {
+    free(contact->phone_numbers[i]);
+  }
+}
+
+void update_value(Contact* c, char key, const char* value) {
+  size_t size = (strlen(value) + 1) * sizeof(char);
+  switch (key) {
+    case 'f':
+      c->firstname = realloc(c->firstname, size);
+      strcpy(c->firstname, value);
+      break;
+    case 'l':
+      c->lastname = realloc(c->lastname, size);
+      strcpy(c->lastname, value);
+      break;
+    case 'm':
+      c->middlename = realloc(c->middlename, size);
+      strcpy(c->middlename, value);
+      break;
+    case 'n':
+      c->phone_numbers[c->numbers_size] =
+          realloc(c->phone_numbers[c->numbers_size], size);
+      strcpy(c->phone_numbers[c->numbers_size], value);
+      c->numbers_size++;
+      break;
+    case 'j':
+      c->job = realloc(c->job, size);
+      strcpy(c->job, value);
+      break;
+    case 'p':
+      c->position = realloc(c->position, size);
+      strcpy(c->position, value);
+      break;
+  }
 }
