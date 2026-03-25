@@ -9,6 +9,80 @@
 
 ContactStorage* storage;
 
+typedef enum ReadStatus {
+  READ_OK = 0,
+  READ_CANCEL,
+  READ_INVALID,
+  READ_FAIL,
+} ReadStatus;
+
+typedef enum MenuStatus { MENU_OK = 0, MENU_FAIL } MenuStatus;
+
+void print_brief(Contact* contact);
+void print_details(Contact* contact);
+
+ReadStatus readline(char* prompt, char* value);
+ReadStatus readline_required(char* prompt, char* value);
+ReadStatus read_number(char* prompt, int* value);
+ReadStatus read_character(char* ch);
+
+MenuStatus add_menu();
+MenuStatus details_menu();
+MenuStatus edit_menu(Contact* c);
+MenuStatus delete_menu(Contact* c);
+MenuStatus edit_numbers(Contact* c);
+
+int main() {
+  storage = create_storage(10);
+  printf("Книга контактов!\n");
+  Contact* contact = create_contact("john", "doe", NULL);
+  Contact* contact2 = create_contact("oleg", "olegov", NULL);
+  add_contact(storage, contact);
+  add_contact(storage, contact2);
+
+  int running = 1;
+  while (running) {
+    for (size_t i = 0; i < storage->size; i++) {
+      printf("[%zu] ", i + 1);
+      print_brief(storage->array[i]);
+    }
+
+    printf("[A] Добавить, [M] Подробнее, [Q] Завершить\n> ");
+
+    char opt;
+    ReadStatus read_status = read_character(&opt);
+    switch (read_status) {
+      case READ_FAIL:
+        return -1;
+      default:
+        break;
+    }
+
+    MenuStatus menu_status = MENU_OK;
+    switch (opt) {
+      case 'A':
+        menu_status = add_menu();
+        break;
+      case 'M':
+        menu_status = details_menu();
+        break;
+      case 'Q':
+        running = 0;
+        break;
+      default:
+        printf("Неизвестная опция - %c.\n", opt);
+        break;
+    }
+
+    if (menu_status == MENU_FAIL) {
+      running = -1;
+    }
+  }
+
+  delete_storage(storage);
+  return 0;
+}
+
 void print_brief(Contact* contact) {
   printf("%s %s\n", contact->firstname, contact->lastname);
 }
@@ -33,15 +107,6 @@ void print_details(Contact* contact) {
     printf("%s\n", contact->position);
   }
 }
-
-typedef enum ReadStatus {
-  READ_OK = 0,
-  READ_CANCEL,
-  READ_INVALID,
-  READ_FAIL,
-} ReadStatus;
-
-typedef enum MenuStatus { MENU_OK = 0, MENU_FAIL } MenuStatus;
 
 ReadStatus readline(char* prompt, char* value) {
   printf(prompt);
@@ -77,11 +142,11 @@ ReadStatus read_number(char* prompt, int* value) {
   if (fgets(buffer, FIELD_SIZE, stdin) == NULL) {
     return READ_FAIL;
   }
-  
+
   if (buffer[0] == '\n') {
     return READ_CANCEL;
   }
-  
+
   if (buffer[0] == 'Q') {
     return READ_CANCEL;
   }
@@ -108,11 +173,6 @@ ReadStatus read_character(char* ch) {
 
   return READ_OK;
 }
-
-MenuStatus add_menu();
-MenuStatus details_menu();
-MenuStatus edit_menu(Contact* c);
-MenuStatus delete_menu(Contact* c);
 
 MenuStatus edit_numbers(Contact* c) {
   ReadStatus status = READ_INVALID;
@@ -340,53 +400,3 @@ MenuStatus delete_menu(Contact* c) {
   }
 }
 
-int main() {
-  storage = create_storage(10);
-  printf("Книга контактов!\n");
-  Contact* contact = create_contact("john", "doe", NULL);
-  Contact* contact2 = create_contact("oleg", "olegov", NULL);
-  add_contact(storage, contact);
-  add_contact(storage, contact2);
-
-  int running = 1;
-  while (running) {
-    for (size_t i = 0; i < storage->size; i++) {
-      printf("[%zu] ", i + 1);
-      print_brief(storage->array[i]);
-    }
-
-    printf("[A] Добавить, [M] Подробнее, [Q] Завершить\n> ");
-
-    char opt;
-    ReadStatus read_status = read_character(&opt);
-    switch (read_status) {
-      case READ_FAIL:
-        return -1;
-      default:
-        break;
-    }
-
-    MenuStatus menu_status = MENU_OK;
-    switch (opt) {
-      case 'A':
-        menu_status = add_menu();
-        break;
-      case 'M':
-        menu_status = details_menu();
-        break;
-      case 'Q':
-        running = 0;
-        break;
-      default:
-        printf("Неизвестная опция - %c.\n", opt);
-        break;
-    }
-
-    if (menu_status == MENU_FAIL) {
-      running = -1;
-    }
-  }
-
-  delete_storage(storage);
-  return 0;
-}
