@@ -137,14 +137,6 @@ void delete_contact(Contact* contact) {
   free(contact->middlename);
   free(contact->job);
   free(contact->position);
-
-  for (size_t i = 0; i < contact->numbers_size; i++) {
-    free(contact->phone_numbers[i]);
-  }
-
-  for (size_t i = 0; i < 5; i++) {
-    free(contact->phone_numbers[i]);
-  }
 }
 
 void update_value(Contact* c, char key, const char* value) {
@@ -161,12 +153,6 @@ void update_value(Contact* c, char key, const char* value) {
     case 'm':
       c->middlename = realloc(c->middlename, size);
       strcpy(c->middlename, value);
-      break;
-    case 'n':
-      c->phone_numbers[c->numbers_size] =
-          realloc(c->phone_numbers[c->numbers_size], size);
-      strcpy(c->phone_numbers[c->numbers_size], value);
-      c->numbers_size++;
       break;
     case 'j':
       c->job = realloc(c->job, size);

@@ -21,7 +21,7 @@ void print_details(Contact* contact) {
     printf("%s\n", contact->middlename);
   }
 
-  for (size_t i = 0; i < contact->numbers_size; i++) {
+  for (size_t i = 0; i < NUMBERS_SIZE; i++) {
     printf("[%d] %s\n", i + 1, contact->phone_numbers[i]);
   }
 
@@ -77,20 +77,17 @@ ReadStatus read_number(char* prompt, int* value) {
   if (fgets(buffer, FIELD_SIZE, stdin) == NULL) {
     return READ_FAIL;
   }
-
+  
   if (buffer[0] == '\n') {
     return READ_CANCEL;
   }
-
+  
   if (buffer[0] == 'Q') {
     return READ_CANCEL;
   }
 
-  char* tmp;
-  int number = strtol(buffer, &tmp, 10);
-  if (*tmp == '\0') {
-    return READ_INVALID;
-  }
+  int number = -1;
+  int retval = sscanf(buffer, "%d", &number);
 
   *value = number;
   return READ_OK;
@@ -117,12 +114,31 @@ MenuStatus details_menu();
 MenuStatus edit_menu(Contact* c);
 MenuStatus delete_menu(Contact* c);
 
-MenuStatus add_number(Contact* c) {
-    
-}
+MenuStatus edit_numbers(Contact* c) {
+  ReadStatus status = READ_INVALID;
+  int num = -1;
+  while (status != READ_OK) {
+    status = read_number("Введите номер слота [1-5]: ", &num);
+    switch (status) {
+      case READ_FAIL:
+        return MENU_FAIL;
+      default:
+        break;
+    }
 
-MenuStatus remove_number(Contact *c) {
+    if (0 > num || num <= 5) {
+      break;
+    }
+  }
 
+  char buffer[FIELD_SIZE];
+  status = readline("Введите номер: ", buffer);
+  if (status == READ_FAIL) {
+    return MENU_FAIL;
+  }
+
+  strncpy(c->phone_numbers[num - 1], buffer, FIELD_SIZE);
+  return MENU_OK;
 }
 
 MenuStatus add_menu() {
@@ -185,7 +201,7 @@ MenuStatus add_menu() {
 }
 
 MenuStatus details_menu() {
-  int idx;
+  int idx = -1;
   while (1) {
     ReadStatus status = READ_INVALID;
     while (status != READ_OK) {
@@ -202,7 +218,7 @@ MenuStatus details_menu() {
       }
     }
 
-    if (status == 1 && idx > 0 && idx < storage->size + 1) {
+    if (status == READ_OK && idx > 0 && idx < storage->size + 1) {
       break;
     } else {
       printf("Неверный ввод.\n");
@@ -213,7 +229,9 @@ MenuStatus details_menu() {
 
   while (1) {
     print_details(storage->array[idx]);
-    printf("[E] Изменить, [P] Добавить номер, [R] Удалить номер, [D] Удалить контакт, [Q] Назад\n> ");
+    printf(
+        "[E] Изменить, [N] Изменить номер, [D] Удалить "
+        "контакт, [Q] Назад\n> ");
 
     char opt = 0;
     if (read_character(&opt) == READ_FAIL) {
@@ -229,10 +247,13 @@ MenuStatus details_menu() {
       case 'D':
         status = delete_menu(storage->array[idx]);
         break;
+      case 'N':
+        status = edit_numbers(storage->array[idx]);
+        break;
       case 'Q':
         return MENU_OK;
       default:
-        printf("Неизвестная опция - %u\n", opt);
+        printf("Неизвестная опция - %u.\n", opt);
         break;
     }
 
@@ -262,9 +283,9 @@ MenuStatus edit_menu(Contact* c) {
         return MENU_FAIL;
       case READ_OK:
         format[args_size] = keys[i];
-        strcpy(args[args_size++], buffer);
+        strncpy(args[args_size++], buffer, FIELD_SIZE);
       default:
-      break;
+        break;
     }
   }
 

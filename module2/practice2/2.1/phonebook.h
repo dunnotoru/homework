@@ -15,8 +15,7 @@ typedef struct Contact {
   char* job;
   char* position;
 
-  int numbers_size;
-  char * phone_numbers[NUMBERS_SIZE];
+  char phone_numbers[NUMBERS_SIZE][FIELD_SIZE];
 } Contact;
 
 typedef struct ContactStorage {
