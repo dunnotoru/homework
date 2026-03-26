@@ -60,7 +60,6 @@ Contact* get_contact(const ContactStorage* storage, int id) {
   ListIterator it = it_begin(storage->data_head);
   for (ListNode* node = it_current(&it); node != NULL; node = it_next(&it)) {
     Contact* c = get_node_value(node);
-    printf("%s\n", c->firstname);
     if (id == c->id) {
       return c;
     }
@@ -103,7 +102,6 @@ Contact* create_contact(const char* firstname, const char* lastname,
 
   for (size_t i = 0; i < format_size; i++) {
     char* value = va_arg(args, char*);
-    printf("%ld %s\n", i, value);
     update_value(c, data_format[i], value);
   }
 

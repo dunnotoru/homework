@@ -102,23 +102,16 @@ void print_details(Contact* contact) {
     return;
   }
 
-  printf("%s\n", contact->firstname);
-  printf("%s\n", contact->lastname);
+  printf("Имя:\t\t%s\n", contact->firstname);
+  printf("Фамилия:\t%s\n", contact->lastname);
 
-  if (contact->middlename != NULL) {
-    printf("%s\n", contact->middlename);
-  }
+  printf("Отчество:\t%s\n", contact->middlename != NULL ? contact->middlename : "...");
+  printf("Место работы:\t%s\n", contact->job != NULL ? contact->job : "...");
+  printf("Должность:\t%s\n", contact->position != NULL ? contact->position : "...");
 
+  printf("Номера: \n");
   for (size_t i = 0; i < NUMBERS_SIZE; i++) {
-    printf("[%ld] %s\n", i + 1, contact->phone_numbers[i]);
-  }
-
-  if (contact->job != NULL) {
-    printf("%s\n", contact->job);
-  }
-
-  if (contact->position != NULL) {
-    printf("%s\n", contact->position);
+    printf("[%ld] %s\n", i + 1, contact->phone_numbers[i][0] != '\0' ? contact->phone_numbers[i] : "...");
   }
 }
 
