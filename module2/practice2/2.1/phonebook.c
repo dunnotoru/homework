@@ -44,19 +44,21 @@ Contact* remove_contact(ContactStorage* storage, int id) {
   if (c == NULL) {
     return NULL;
   }
-
+  
   int idx = -1;
   for (size_t i = 0; i < storage->size; i++) {
     if (storage->array[i]->id == id) {
       c = storage->array[i];
-      storage->array = NULL;
+      storage->array[i] = NULL;
       idx = i;
+      break;
     }
   }
-
   for (size_t i = idx; i < storage->size - 1; i++) {
     storage->array[i] = storage->array[i + 1];
   }
+
+  storage->size--;
 
   return c;
 }
@@ -102,7 +104,6 @@ Contact* create_contact(const char* firstname, const char* lastname,
   va_list args;
   va_start(args, data_format);
   size_t format_size = strlen(data_format);
-  printf("format size: %d \n", format_size);
 
   for (size_t i = 0; i < format_size; i++) {
     char* value = va_arg(args, char*);
@@ -154,6 +155,8 @@ void update_value(Contact* c, char key, const char* value) {
       c->middlename = realloc(c->middlename, size);
       strcpy(c->middlename, value);
       break;
+    case 'n':
+      strcpy(c->phone_numbers[0], value);
     case 'j':
       c->job = realloc(c->job, size);
       strcpy(c->job, value);

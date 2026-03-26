@@ -38,7 +38,4 @@ Contact* create_contact(const char* firstname, const char* lastname,
 int update_contact(Contact* contact, const char* data_format, ...);
 void delete_contact(Contact* contact);
 
-void print_brief(Contact* contact);
-void print_details(Contact* contact);
-
 #endif
