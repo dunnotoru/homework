@@ -117,6 +117,9 @@ bool try_parse_str(const char* str) {
 
 bool try_parse_oct(const char* str) {
   uint16_t perms;
+  if (strlen(str) > 3) {
+    return false;
+  }
   if (sscanf(str, "%ho", &perms) != 1) {
     return false;
   }

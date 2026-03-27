@@ -18,7 +18,7 @@ uint32_t parse_address(const char* ip_str) {
   int status = regexec(&ip_regex, buffer, 0, NULL, 0);
   if (status != 0) {
     fprintf(stderr, "Ошибка при парсинге адреса: %s\n", ip_str);
-    exit(-1);
+    exit(1);
   }
 
   token = strtok(buffer, ".");
@@ -28,13 +28,13 @@ uint32_t parse_address(const char* ip_str) {
     int byte = strtol(token, &tmp, 10);
     if (tmp == buffer || *tmp != '\0') {
       fprintf(stderr, "Ошибка при парсинге адреса: %s\n", ip_str);
-      exit(-1);
+      exit(1);
     }
 
     if (byte < 0 || byte > 255) {
       fprintf(stderr,
               "Ошибка при парсинге адреса. Диапазон значений байта [0-255].\n");
-      exit(-1);
+      exit(1);
     }
 
     ip = (ip << 8) | byte;
@@ -42,7 +42,7 @@ uint32_t parse_address(const char* ip_str) {
 
     if (byte_count > 4) {
       fprintf(stderr, "Ошибка при парсинге адреса. Превышена длина. \n");
-      exit(-1);
+      exit(1);
     }
   }
 
@@ -75,21 +75,25 @@ void run(uint32_t n, uint32_t gateway, uint32_t mask) {
 int main(int argc, char const* argv[]) {
   if (argc != 4) {
     fprintf(stderr, "Ожидается: <ip4_шлюза> <ip4_маска> <N>\n");
-    return -1;
+    return 1;
   }
 
   srand(time(NULL));
 
-  regcomp(&ip_regex, "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$", REG_EXTENDED);
+  regcomp(&ip_regex, "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$",
+          REG_EXTENDED);
 
-  uint32_t gw = parse_address(argv[1]);
-  uint32_t mask = parse_address(argv[2]);
+  uint16_t gw = 0;
+  uint16_t mask = 0;
+
+  gw = parse_address(argv[1]);
+  mask = parse_address(argv[2]);
 
   char* tmp;
   uint32_t n = strtol(argv[3], &tmp, 10);
   if (*tmp != '\0') {
     fprintf(stderr, "N должно быть числом.\n");
-    return -1;
+    return 1;
   }
 
   printf("gateway: %.10u\t%.32b\n", gw, gw);
