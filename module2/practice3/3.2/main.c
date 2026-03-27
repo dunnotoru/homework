@@ -49,6 +49,57 @@ uint32_t parse_address(const char* ip_str) {
   return ip;
 }
 
+int parse_address_with_mask(const char* ip_str, uint32_t* ip, uint32_t* mask) {
+  char buffer[33];
+  strncpy(buffer, ip_str, 33);
+  buffer[sizeof(buffer) - 1] = '\0';
+
+  char* token = strtok(buffer, "/");
+  if (token == NULL) {
+    return 0;
+  }
+
+  char gw[16];
+  strncpy(gw, token, 16);
+  gw[sizeof(gw) - 1] = '\0';
+
+  token = strtok(NULL, "/");
+  if (token == NULL) {
+    return 0;
+  }
+
+  char maskbuf[16];
+  strncpy(maskbuf, token, 16);
+  maskbuf[sizeof(maskbuf) - 1] = '\0';
+
+  *ip = parse_address(gw);
+  if (token == NULL) {
+    return 0;
+  }
+
+  char* tmp;
+  uint8_t bits = strtol(maskbuf, &tmp, 10);
+  if (tmp == maskbuf) {
+    return 0;
+  }
+
+  if (*tmp == '\0') {
+    if (bits < 0 || 32 < bits) {
+      return 0;
+    }
+
+    for (size_t i = 0; i < bits; i++) {
+      *mask |= 1 << i;
+    }
+
+    return 1;
+  }
+
+  *mask = parse_address(maskbuf);
+
+  return 1;
+}
+
 uint8_t is_in_subnet(uint32_t ip, uint32_t gateway, uint32_t mask) {
   return (ip & mask) == (gateway & mask);
 }
@@ -56,7 +107,6 @@ uint8_t is_in_subnet(uint32_t ip, uint32_t gateway, uint32_t mask) {
 void run(uint32_t n, uint32_t gateway, uint32_t mask) {
   uint32_t in_subnet = 0;
   for (uint32_t i = 0; i < n; i++) {
-    //????????? rand generates like 2^31 not 2^15
     uint32_t r = rand() % UINT16_MAX;
     uint32_t tmp = rand() % UINT16_MAX;
     r = (r << 16) + tmp;
@@ -67,39 +117,46 @@ void run(uint32_t n, uint32_t gateway, uint32_t mask) {
 
   double percent = (double)in_subnet / n * 100;
 
-  printf("Всего:\t\t %u\n", n);
-  printf("Входят:\t\t %u [%.4f %%]\n", in_subnet, percent);
-  printf("Не входят:\t %u [%.4f %%]\n", n - in_subnet, 100.0 - percent);
+  printf("Всего:\t\t %lu\n", n);
+  printf("Входят:\t\t %lu [%.4f %%]\n", in_subnet, percent);
+  printf("Не входят:\t %lu [%.4f %%]\n", n - in_subnet, 100.0 - percent);
 }
 
 int main(int argc, char const* argv[]) {
-  if (argc != 4) {
+  regcomp(&ip_regex, "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$",
+          REG_EXTENDED);
+  uint32_t gw = 0;
+  uint32_t mask = 0;
+  const char* n_arg = NULL;
+  if (argc == 4) {
+    gw = parse_address(argv[1]);
+    mask = parse_address(argv[2]);
+    n_arg = argv[3];
+  } else if (argc == 3) {
+    int result = parse_address_with_mask(argv[1], &gw, &mask);
+    n_arg = argv[2];
+    if (result == 0) {
+      fprintf(stderr, "Ожидается: <ip4_шлюза> <ip4_маска> <N>\n");
+      return 1;
+    }
+  } else {
     fprintf(stderr, "Ожидается: <ip4_шлюза> <ip4_маска> <N>\n");
     return 1;
   }
 
   srand(time(NULL));
 
-  regcomp(&ip_regex, "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$",
-          REG_EXTENDED);
-
-  uint16_t gw = 0;
-  uint16_t mask = 0;
-
-  gw = parse_address(argv[1]);
-  mask = parse_address(argv[2]);
-
   char* tmp;
-  uint32_t n = strtol(argv[3], &tmp, 10);
+  uint32_t n = strtol(n_arg, &tmp, 10);
   if (*tmp != '\0') {
     fprintf(stderr, "N должно быть числом.\n");
     return 1;
   }
 
-  printf("gateway: %.10u\t%.32b\n", gw, gw);
-  printf("mask:\t %.10u\t%.32b\n", mask, mask);
+  printf("gateway: %.10lu\t%.32b\n", gw, gw);
+  printf("mask:\t %.10lu\t%.32b\n", mask, mask);
   uint32_t subnet = gw & mask;
-  printf("subnet:\t %.10u\t%.32b\n", subnet, subnet);
+  printf("subnet:\t %.10lu\t%.32b\n", subnet, subnet);
 
   run(n, gw, mask);
 
