@@ -10,33 +10,31 @@ void update_value(Contact* c, char key, const char* value);
 
 ContactStorage* create_storage() {
   ContactStorage* storage = malloc(sizeof(ContactStorage));
-  storage->data_head = NULL;
+  storage->list = NULL;
   storage->size = 0;
   storage->nextid = 1;
   return storage;
 }
 
 void delete_storage(ContactStorage* storage) {
-  if (storage->data_head == NULL) {
+  if (storage->list == NULL) {
     free(storage);
     return;
   }
 
-  ListNode* cur = storage->data_head;
-  do {
-    ListNode* tmp = cur;
-    Contact* c = get_node_value(tmp);
+  ListIterator* it = it_begin(storage->list);
+
+  while (it_has_next(it)) {
+    Contact* c = it_remove_current(it);
     delete_contact(c);
+  }
 
-    cur = cur->next;
-    cur->prev = NULL;
-    free(tmp);
-  } while (cur != storage->data_head && cur != NULL);
-
+  it_delete(it);
+  free(storage->list);
   free(storage);
 }
 
-int add_cmp(void* left, void* right) {
+int lastname_cmp(void* left, void* right) {
   return strcmp(((Contact*)left)->lastname, ((Contact*)right)->lastname);
 }
 
@@ -45,27 +43,37 @@ void add_contact(ContactStorage* storage, Contact* contact) {
     return;
   }
 
-  storage->data_head = insert_node(storage->data_head, contact, add_cmp);
+  if (storage->list == NULL) {
+    storage->list = list_create(lastname_cmp);
+  }
+
+  list_insert(storage->list, contact);
 
   contact->id = storage->nextid++;
   storage->size++;
 }
 
-Contact* remove_contact(ContactStorage* storage, Contact* contact) {
-  storage->data_head = remove_node(storage->data_head, contact);
-  return contact;
+void remove_contact(ContactStorage* storage, Contact* contact) {
+  int retval = list_remove_value(storage->list, contact);
+  if (retval) {
+    storage->size--;
+  }
 }
 
 Contact* get_contact(const ContactStorage* storage, int id) {
-  ListIterator it = it_begin(storage->data_head);
-  for (ListNode* node = it_current(&it); node != NULL; node = it_next(&it)) {
-    Contact* c = get_node_value(node);
+  ListIterator* it = it_begin(storage->list);
+  Contact* result = NULL;
+  while (it_has_next(it)) {
+    Contact* c = it_next(it);
     if (id == c->id) {
-      return c;
+      result = c;
+      break;
     }
   }
 
-  return NULL;
+  it_delete(it);
+
+  return result;
 }
 
 Contact* create_contact(const char* firstname, const char* lastname,

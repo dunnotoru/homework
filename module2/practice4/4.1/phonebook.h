@@ -20,7 +20,7 @@ typedef struct Contact {
 } Contact;
 
 typedef struct ContactStorage {
-  ListNode* data_head;
+  List* list;
   size_t size;
   size_t nextid;
 } ContactStorage;
@@ -30,7 +30,7 @@ void delete_storage(ContactStorage* storage);
 
 void add_contact(ContactStorage* storage, Contact* contact);
 Contact* get_contact(const ContactStorage* storage, int id);
-Contact* remove_contact(ContactStorage* storage, Contact* contact);
+void remove_contact(ContactStorage* storage, Contact* contact);
 
 Contact* create_contact(const char* firstname, const char* lastname,
                         const char* data_format, ...);

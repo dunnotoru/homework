@@ -1,27 +1,20 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
-typedef struct ListNode {
-  void* value;
-  struct ListNode* prev;
-  struct ListNode* next;
-} ListNode;
-
 typedef int (*cmp_func)(void*, void*);
 
-ListNode* create_node(void* value);
-ListNode* insert_node(ListNode* head, void* value, cmp_func cmp);
-ListNode* remove_node(ListNode* head, void* value);
-void* get_node_value(ListNode* node);
+typedef struct List List;
+typedef struct ListIterator ListIterator;
 
-typedef struct ListIterator {
-  ListNode* head;
-  ListNode* current;
-} ListIterator;
+List* list_create(cmp_func cmp);
+void list_insert(List* list, void* value);
+int list_remove_value(List* list, void* value);
 
-ListIterator it_begin(ListNode* head);
-ListNode* it_current(ListIterator* iterator);
-ListNode* it_next(ListIterator* iterator);
+ListIterator* it_begin(List* list);
+void* it_current(ListIterator* iterator);
+void* it_remove_current(ListIterator* iterator);
+void* it_next(ListIterator* iterator);
 int it_has_next(ListIterator* iterator);
+void it_delete(ListIterator* iterator);
 
 #endif

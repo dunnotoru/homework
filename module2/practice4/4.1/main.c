@@ -27,7 +27,9 @@ ReadStatus read_number(char* prompt, int* value);
 ReadStatus read_character(char* ch);
 
 MenuStatus add_menu();
-MenuStatus details_menu();
+MenuStatus select_menu();
+MenuStatus search_menu();
+MenuStatus details_menu(Contact* c);
 MenuStatus edit_menu(Contact* c);
 MenuStatus delete_menu(Contact* c);
 MenuStatus edit_numbers(Contact* c);
@@ -40,24 +42,26 @@ int main() {
   add_contact(storage, contact);
   add_contact(storage, contact2);
 
+  ListIterator* it;
   int running = 1;
   while (running) {
     size_t i = 0;
-    ListIterator it = it_begin(storage->data_head);
-    for (ListNode* node = it_current(&it); node != NULL; node = it_next(&it)) {
-      Contact* contact = get_node_value(node);
+
+    it = it_begin(storage->list);
+    while (it_has_next(it)) {
+      Contact* contact = it_next(it);
       printf("[%zu] ", i + 1);
       print_brief(contact);
       i++;
     }
 
-    printf("[A] Добавить, [M] Подробнее, [Q] Завершить\n> ");
+    printf("[A] Добавить, [M] Подробнее, [S] Поиск, [Q] Завершить\n> ");
 
     char opt;
     ReadStatus read_status = read_character(&opt);
     switch (read_status) {
       case READ_FAIL:
-        return -1;
+        return 1;
       default:
         break;
     }
@@ -68,7 +72,10 @@ int main() {
         menu_status = add_menu();
         break;
       case 'M':
-        menu_status = details_menu();
+        menu_status = select_menu();
+        break;
+      case 'S':
+        menu_status = search_menu();
         break;
       case 'Q':
         running = 0;
@@ -79,7 +86,7 @@ int main() {
     }
 
     if (menu_status == MENU_FAIL) {
-      running = -1;
+      running = 0;
     }
   }
 
@@ -105,13 +112,17 @@ void print_details(Contact* contact) {
   printf("Имя:\t\t%s\n", contact->firstname);
   printf("Фамилия:\t%s\n", contact->lastname);
 
-  printf("Отчество:\t%s\n", contact->middlename != NULL ? contact->middlename : "...");
+  printf("Отчество:\t%s\n",
+         contact->middlename != NULL ? contact->middlename : "...");
   printf("Место работы:\t%s\n", contact->job != NULL ? contact->job : "...");
-  printf("Должность:\t%s\n", contact->position != NULL ? contact->position : "...");
+  printf("Должность:\t%s\n",
+         contact->position != NULL ? contact->position : "...");
 
   printf("Номера: \n");
   for (size_t i = 0; i < NUMBERS_SIZE; i++) {
-    printf("[%ld] %s\n", i + 1, contact->phone_numbers[i][0] != '\0' ? contact->phone_numbers[i] : "...");
+    printf("[%ld] %s\n", i + 1,
+           contact->phone_numbers[i][0] != '\0' ? contact->phone_numbers[i]
+                                                : "...");
   }
 }
 
@@ -270,48 +281,7 @@ MenuStatus add_menu() {
   return MENU_OK;
 }
 
-MenuStatus details_menu() {
-  int id = -1;
-  while (1) {
-    ReadStatus status = READ_INVALID;
-    while (status != READ_OK) {
-      status =
-          read_number("Введите номер контакта (Q чтобы отказаться): ", &id);
-      switch (status) {
-        case READ_FAIL:
-          return MENU_FAIL;
-        case READ_INVALID:
-          printf("Неправильный ввод.\n");
-          break;
-        case READ_CANCEL:
-          return MENU_OK;
-        default:
-          break;
-      }
-    }
-
-    if (status == READ_OK && id > 0 && (size_t)id < storage->size + 1) {
-      break;
-    } else {
-      printf("Неверный ввод.\n");
-    }
-  }
-
-  id -= 1;
-
-  ListIterator it = it_begin(storage->data_head);
-  int i = 0;
-  ListNode* node;
-  for (node = it_current(&it); node != NULL && i < id; node = it_next(&it)) {
-    i++;
-  }
-
-  Contact* c = get_node_value(node);
-  if (i != id || c == NULL) {
-    printf("Контакт не найден.\n");
-    return MENU_OK;
-  }
-
+MenuStatus details_menu(Contact* c) {
   while (1) {
     print_details(c);
     printf(
@@ -348,6 +318,130 @@ MenuStatus details_menu() {
       return MENU_FAIL;
     }
   }
+}
+
+MenuStatus select_menu() {
+  int id = -1;
+  while (1) {
+    ReadStatus status = READ_INVALID;
+    while (status != READ_OK) {
+      status =
+          read_number("Введите номер контакта (Q чтобы отказаться): ", &id);
+      switch (status) {
+        case READ_FAIL:
+          return MENU_FAIL;
+        case READ_INVALID:
+          printf("Неправильный ввод.\n");
+          break;
+        case READ_CANCEL:
+          return MENU_OK;
+        default:
+          break;
+      }
+    }
+
+    if (status == READ_OK && id > 0 && (size_t)id < storage->size + 1) {
+      break;
+    } else {
+      printf("Неправильный ввод.\n");
+    }
+  }
+
+  ListIterator* it = it_begin(storage->list);
+  int i = 0;
+  Contact* c = NULL;
+  while (it_has_next(it) && i < id) {
+    c = it_next(it);
+    i++;
+  }
+
+  it_delete(it);
+
+  if (i != id || c == NULL) {
+    printf("Контакт не найден.\n");
+    return MENU_OK;
+  }
+
+  return details_menu(c);
+}
+
+MenuStatus search_menu() {
+  printf("Поиск по фамилии.\n");
+  char query[FIELD_SIZE];
+  ReadStatus status = readline("> ", query);
+  switch (status) {
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_CANCEL:
+      return MENU_OK;
+    default:
+      break;
+  }
+
+  ListIterator* it = it_begin(storage->list);
+  int i = 0;
+  while (it_has_next(it)) {
+    Contact* c = it_next(it);
+    if (strstr(c->lastname, query)) {
+      i++;
+      printf("[%d] ", i);
+      print_brief(c);
+    }
+  }
+
+  it_delete(it);
+
+  if (i == 0) {
+    printf("Контактов по такому запросу не найдено.\n");
+    return MENU_OK;
+  }
+
+  int id = -1;
+  while (1) {
+    ReadStatus status = READ_INVALID;
+    while (status != READ_OK) {
+      status =
+          read_number("Введите номер контакта (Q чтобы отказаться): ", &id);
+      switch (status) {
+        case READ_FAIL:
+          return MENU_FAIL;
+        case READ_INVALID:
+          printf("Неправильный ввод.\n");
+          break;
+        case READ_CANCEL:
+          return MENU_OK;
+        default:
+          break;
+      }
+    }
+
+    if (status == READ_OK && id > 0 && id < i + 1) {
+      break;
+    } else {
+      printf("Неправильный ввод.\n");
+    }
+  }
+
+  it = it_begin(storage->list);
+  i = 0;
+  Contact* c = NULL;
+  while (it_has_next(it) && i < id) {
+    c = it_next(it);
+    if (strstr(c->lastname, query)) {
+      i++;
+    }
+  }
+
+  printf("%d ?= %d\n", i, id);
+
+  it_delete(it);
+
+  if (i != id || c == NULL) {
+    printf("Контакт не найден.\n");
+    return MENU_OK;
+  }
+
+  return details_menu(c);
 }
 
 MenuStatus edit_menu(Contact* c) {
