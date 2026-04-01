@@ -142,6 +142,7 @@ void delete_contact(Contact* contact) {
   free(contact->middlename);
   free(contact->job);
   free(contact->position);
+  free(contact);
 }
 
 void update_value(Contact* c, char key, const char* value) {

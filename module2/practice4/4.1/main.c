@@ -1,13 +1,15 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "linked_list.h"
 #include "phonebook.h"
 
 #define A_FIELD_COUNT 5
 #define U_FIELD_COUNT 7
 
-ContactStorage* storage;
+ContactStorage *storage;
 
 typedef enum ReadStatus {
   READ_OK = 0,
@@ -16,85 +18,95 @@ typedef enum ReadStatus {
   READ_FAIL,
 } ReadStatus;
 
-typedef enum MenuStatus { MENU_OK = 0, MENU_FAIL } MenuStatus;
+typedef enum MenuStatus {
+  MENU_OK = 0,
+  MENU_FAIL,
+  MENU_INVALID,
+  MENU_QUIT
+} MenuStatus;
 
-void print_brief(Contact* contact);
-void print_details(Contact* contact);
+void print_brief(Contact *contact);
+void print_details(Contact *contact);
 
-ReadStatus readline(char* prompt, char* value);
-ReadStatus readline_required(char* prompt, char* value);
-ReadStatus read_number(char* prompt, int* value);
-ReadStatus read_character(char* ch);
+ReadStatus readline(char buffer[FIELD_SIZE]);
+ReadStatus readline_required(char buffer[FIELD_SIZE]);
 
+bool try_parse_int(char buffer[FIELD_SIZE], int *value);
+bool try_parse_size_t(char buffer[FIELD_SIZE], size_t *value);
+MenuStatus move_to_menu(char opt);
+MenuStatus details_move_to_menu(char opt, Contact *c);
 MenuStatus add_menu();
 MenuStatus select_menu();
 MenuStatus search_menu();
-MenuStatus details_menu(Contact* c);
-MenuStatus edit_menu(Contact* c);
-MenuStatus delete_menu(Contact* c);
-MenuStatus edit_numbers(Contact* c);
+MenuStatus details_menu(Contact *c);
+MenuStatus edit_menu(Contact *c);
+MenuStatus delete_menu(Contact *c);
+MenuStatus edit_numbers(Contact *c);
 
 int main() {
   storage = create_storage();
   printf("Книга контактов!\n");
-  Contact* contact = create_contact("john", "doe", NULL);
-  Contact* contact2 = create_contact("oleg", "olegov", NULL);
+  Contact *contact = create_contact("john", "doe", NULL);
+  Contact *contact2 = create_contact("oleg", "olegov", NULL);
   add_contact(storage, contact);
   add_contact(storage, contact2);
 
-  ListIterator* it;
-  int running = 1;
-  while (running) {
+  ListIterator *it;
+  while (true) {
     size_t i = 0;
 
     it = it_begin(storage->list);
     while (it_has_next(it)) {
-      Contact* contact = it_next(it);
+      Contact *contact = it_next(it);
       printf("[%zu] ", i + 1);
       print_brief(contact);
       i++;
     }
 
     printf("[A] Добавить, [M] Подробнее, [S] Поиск, [Q] Завершить\n> ");
-
-    char opt;
-    ReadStatus read_status = read_character(&opt);
-    switch (read_status) {
-      case READ_FAIL:
-        return 1;
-      default:
-        break;
+    char buffer[FIELD_SIZE];
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
+    case READ_FAIL:
+      return 1;
+    default:
+      continue;
     }
 
-    MenuStatus menu_status = MENU_OK;
-    switch (opt) {
-      case 'A':
-        menu_status = add_menu();
-        break;
-      case 'M':
-        menu_status = select_menu();
-        break;
-      case 'S':
-        menu_status = search_menu();
-        break;
-      case 'Q':
-        running = 0;
-        break;
-      default:
-        printf("Неизвестная опция - %c.\n", opt);
-        break;
+    char opt = buffer[0];
+    MenuStatus status = move_to_menu(opt);
+    if (status == MENU_FAIL) {
+      return 1;
     }
 
-    if (menu_status == MENU_FAIL) {
-      running = 0;
+    if(status == MENU_QUIT) {
+      break;
     }
   }
 
+  it_delete(it);
   delete_storage(storage);
   return 0;
 }
 
-void print_brief(Contact* contact) {
+MenuStatus move_to_menu(char opt) {
+  switch (opt) {
+  case 'A':
+    return add_menu();
+  case 'M':
+    return select_menu();
+  case 'S':
+    return search_menu();
+  case 'Q':
+    return MENU_QUIT;
+  default:
+    printf("Неизвестная опция - %c.\n", opt);
+    return MENU_INVALID;
+  }
+}
+
+void print_brief(Contact *contact) {
   if (contact == NULL) {
     printf("Контакт не найден.\n");
     return;
@@ -103,7 +115,7 @@ void print_brief(Contact* contact) {
   printf("%s %s\n", contact->firstname, contact->lastname);
 }
 
-void print_details(Contact* contact) {
+void print_details(Contact *contact) {
   if (contact == NULL) {
     printf("Контакт не найден.\n");
     return;
@@ -126,9 +138,7 @@ void print_details(Contact* contact) {
   }
 }
 
-ReadStatus readline(char* prompt, char* value) {
-  printf(prompt);
-  char buffer[FIELD_SIZE];
+ReadStatus readline(char buffer[FIELD_SIZE]) {
   if (fgets(buffer, FIELD_SIZE, stdin) == NULL) {
     return READ_FAIL;
   }
@@ -137,15 +147,15 @@ ReadStatus readline(char* prompt, char* value) {
     return READ_CANCEL;
   }
 
-  sscanf(buffer, "%s", value);
+  sscanf(buffer, "%s", buffer);
 
   return READ_OK;
 }
 
-ReadStatus readline_required(char* prompt, char* value) {
+ReadStatus readline_required(char buffer[FIELD_SIZE]) {
   ReadStatus status = READ_CANCEL;
   while (status != READ_OK) {
-    status = readline(prompt, value);
+    status = readline(buffer);
     if (status == READ_FAIL) {
       return status;
     }
@@ -154,68 +164,58 @@ ReadStatus readline_required(char* prompt, char* value) {
   return READ_OK;
 }
 
-ReadStatus read_number(char* prompt, int* value) {
-  printf(prompt);
+bool try_parse_int(char buffer[FIELD_SIZE], int *value) {
+  if (sscanf(buffer, "%d", value) == 1) {
+    return true;
+  }
+
+  return false;
+}
+
+bool try_parse_size_t(char buffer[FIELD_SIZE], size_t *value) {
+  if (sscanf(buffer, "%zu", value) == 1) {
+    return true;
+  }
+
+  return false;
+}
+
+MenuStatus edit_numbers(Contact *c) {
+
   char buffer[FIELD_SIZE];
-  if (fgets(buffer, FIELD_SIZE, stdin) == NULL) {
-    return READ_FAIL;
-  }
-
-  if (buffer[0] == '\n') {
-    return READ_CANCEL;
-  }
-
-  if (buffer[0] == 'Q') {
-    return READ_CANCEL;
-  }
-
-  int number = -1;
-  sscanf(buffer, "%d", &number);
-
-  *value = number;
-  return READ_OK;
-}
-
-ReadStatus read_character(char* ch) {
-  char input = getchar();
-  *ch = input;
-  if (input == EOF) {
-    return READ_FAIL;
-  }
-
-  while ((input = getchar()) != '\n' && input != EOF);
-
-  if (input == EOF) {
-    return READ_FAIL;
-  }
-
-  return READ_OK;
-}
-
-MenuStatus edit_numbers(Contact* c) {
-  ReadStatus status = READ_INVALID;
-  int num = -1;
-  while (status != READ_OK) {
-    status = read_number("Введите номер слота [1-5]: ", &num);
-    switch (status) {
-      case READ_FAIL:
-        return MENU_FAIL;
-      default:
-        break;
+  int input_num = -1;
+  while (true) {
+    printf("Введите номер слота [1-5]: ");
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
+    case READ_CANCEL:
+      return MENU_OK;
+    case READ_INVALID:
+      continue;
+    case READ_FAIL:
+      return MENU_FAIL;
     }
 
-    if (0 > num || num <= 5) {
+    if (try_parse_int(buffer, &input_num) && input_num > 0 && input_num < 6) {
       break;
     }
   }
 
-  char buffer[FIELD_SIZE];
-  status = readline("Введите номер: ", buffer);
-  if (status == READ_FAIL) {
+  printf("Введите номер: ");
+  switch (readline(buffer)) {
+  case READ_OK:
+    break;
+  case READ_FAIL:
     return MENU_FAIL;
+  case READ_CANCEL:
+    strncpy(c->phone_numbers[input_num - 1], "", 1);
+    return MENU_OK;
+  default:
+    return MENU_OK;
   }
 
-  strncpy(c->phone_numbers[num - 1], buffer, FIELD_SIZE);
+  strncpy(c->phone_numbers[input_num - 1], buffer, FIELD_SIZE);
   return MENU_OK;
 }
 
@@ -224,12 +224,14 @@ MenuStatus add_menu() {
   char lastname[FIELD_SIZE];
 
   ReadStatus status = READ_OK;
-  status = readline_required("Имя*: ", name);
+  printf("Имя: ");
+  status = readline_required(name);
   if (status == READ_FAIL) {
     return MENU_FAIL;
   }
 
-  status = readline_required("Фамилия*: ", lastname);
+  printf("Фамилия: ");
+  status = readline_required(lastname);
   if (status == READ_FAIL) {
     return MENU_FAIL;
   }
@@ -243,36 +245,37 @@ MenuStatus add_menu() {
   size_t args_size = 0;
   for (size_t i = 0; i < A_FIELD_COUNT - 1; i++) {
     char buffer[FIELD_SIZE];
-    status = readline(prompts[i], buffer);
+    printf("%s", prompts[i]);
+    status = readline(buffer);
     switch (status) {
-      case READ_FAIL:
-        return MENU_FAIL;
-      case READ_OK:
-        format[args_size] = keys[i];
-        strcpy(args[args_size++], buffer);
-      default:
-        break;
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_OK:
+      format[args_size] = keys[i];
+      strncpy(args[args_size++], buffer, FIELD_SIZE);
+    default:
+      break;
     }
   }
 
-  Contact* c;
+  Contact *c;
   switch (args_size) {
-    case 0:
-      c = create_contact(name, lastname, NULL);
-      break;
-    case 1:
-      c = create_contact(name, lastname, format, args[0]);
-      break;
-    case 2:
-      c = create_contact(name, lastname, format, args[0], args[1]);
-      break;
-    case 3:
-      c = create_contact(name, lastname, format, args[0], args[1], args[2]);
-      break;
-    case 4:
-      c = create_contact(name, lastname, format, args[0], args[1], args[2],
-                         args[3]);
-      break;
+  case 0:
+    c = create_contact(name, lastname, NULL);
+    break;
+  case 1:
+    c = create_contact(name, lastname, format, args[0]);
+    break;
+  case 2:
+    c = create_contact(name, lastname, format, args[0], args[1]);
+    break;
+  case 3:
+    c = create_contact(name, lastname, format, args[0], args[1], args[2]);
+    break;
+  case 4:
+    c = create_contact(name, lastname, format, args[0], args[1], args[2],
+                       args[3]);
+    break;
   }
 
   add_contact(storage, c);
@@ -281,83 +284,92 @@ MenuStatus add_menu() {
   return MENU_OK;
 }
 
-MenuStatus details_menu(Contact* c) {
-  while (1) {
+MenuStatus details_move_to_menu(char opt, Contact *c) {
+  switch (opt) {
+  case 'E':
+    return edit_menu(c);
+  case 'D':
+    return delete_menu(c);
+  case 'N':
+    return edit_numbers(c);
+  case 'Q':
+    return MENU_QUIT;
+  default:
+    printf("Неизвестная опция - %u.\n", opt);
+    return MENU_INVALID;
+  }
+}
+
+MenuStatus details_menu(Contact *c) {
+  while (true) {
     print_details(c);
-    printf(
-        "[E] Изменить, "
-        "[N] Изменить номер, "
-        "[D] Удалить контакт, "
-        "[Q] Назад\n> ");
+    printf("[E] Изменить, "
+           "[N] Изменить номер, "
+           "[D] Удалить контакт, "
+           "[Q] Назад\n> ");
 
-    char opt = 0;
-    if (read_character(&opt) == READ_FAIL) {
+    char buffer[FIELD_SIZE];
+
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
+    case READ_FAIL:
       return MENU_FAIL;
+    default:
+      return MENU_OK;
     }
 
-    MenuStatus status = MENU_OK;
-
-    switch (opt) {
-      case 'E':
-        status = edit_menu(c);
-        break;
-      case 'D':
-        status = delete_menu(c);
-        return status;
-      case 'N':
-        status = edit_numbers(c);
-        break;
-      case 'Q':
-        return MENU_OK;
-      default:
-        printf("Неизвестная опция - %u.\n", opt);
-        break;
-    }
-
-    if (status == MENU_FAIL) {
+    char opt = buffer[0];
+    switch (details_move_to_menu(opt, c)) {
+    case MENU_FAIL:
       return MENU_FAIL;
+    case MENU_QUIT:
+      return MENU_OK;
+    default:
+      break;
     }
   }
 }
 
 MenuStatus select_menu() {
-  int id = -1;
-  while (1) {
-    ReadStatus status = READ_INVALID;
-    while (status != READ_OK) {
-      status =
-          read_number("Введите номер контакта (Q чтобы отказаться): ", &id);
-      switch (status) {
-        case READ_FAIL:
-          return MENU_FAIL;
-        case READ_INVALID:
-          printf("Неправильный ввод.\n");
-          break;
-        case READ_CANCEL:
-          return MENU_OK;
-        default:
-          break;
-      }
+  char buffer[FIELD_SIZE];
+  size_t input_num = 0;
+  while (true) {
+    printf("Введите номер контакта (Q чтобы отказаться): ");
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
+    case READ_CANCEL:
+      return MENU_OK;
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_INVALID:
+      continue;
     }
 
-    if (status == READ_OK && id > 0 && (size_t)id < storage->size + 1) {
+    if (buffer[0] == 'Q') {
+      return MENU_OK;
+    }
+
+    if (try_parse_size_t(buffer, &input_num) && input_num > 0 &&
+        input_num < storage->size + 1) {
       break;
     } else {
-      printf("Неправильный ввод.\n");
+      printf("Неправильный ввод. Ожидается индекс контакта в списке.\n");
     }
   }
 
-  ListIterator* it = it_begin(storage->list);
-  int i = 0;
-  Contact* c = NULL;
-  while (it_has_next(it) && i < id) {
+  ListIterator *it = it_begin(storage->list);
+  size_t i = 0;
+  Contact *c = NULL;
+  while (it_has_next(it) && i < input_num) {
     c = it_next(it);
     i++;
   }
 
   it_delete(it);
 
-  if (i != id || c == NULL) {
+  if (i != input_num || c == NULL) {
     printf("Контакт не найден.\n");
     return MENU_OK;
   }
@@ -366,25 +378,28 @@ MenuStatus select_menu() {
 }
 
 MenuStatus search_menu() {
-  printf("Поиск по фамилии.\n");
-  char query[FIELD_SIZE];
-  ReadStatus status = readline("> ", query);
-  switch (status) {
-    case READ_FAIL:
-      return MENU_FAIL;
+  printf("Поиск по фамилии.\n> ");
+  char buffer[FIELD_SIZE];
+  while (true) {
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
     case READ_CANCEL:
       return MENU_OK;
-    default:
-      break;
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_INVALID:
+      continue;
+    }
   }
 
-  ListIterator* it = it_begin(storage->list);
-  int i = 0;
+  ListIterator *it = it_begin(storage->list);
+  size_t i = 0;
   while (it_has_next(it)) {
-    Contact* c = it_next(it);
-    if (strstr(c->lastname, query)) {
+    Contact *c = it_next(it);
+    if (strstr(c->lastname, buffer)) {
       i++;
-      printf("[%d] ", i);
+      printf("[%zu] ", i);
       print_brief(c);
     }
   }
@@ -396,47 +411,45 @@ MenuStatus search_menu() {
     return MENU_OK;
   }
 
-  int id = -1;
-  while (1) {
-    ReadStatus status = READ_INVALID;
-    while (status != READ_OK) {
-      status =
-          read_number("Введите номер контакта (Q чтобы отказаться): ", &id);
-      switch (status) {
-        case READ_FAIL:
-          return MENU_FAIL;
-        case READ_INVALID:
-          printf("Неправильный ввод.\n");
-          break;
-        case READ_CANCEL:
-          return MENU_OK;
-        default:
-          break;
-      }
+  size_t input_num = -1;
+  while (true) {
+    printf("Введите номер контакта (Q чтобы отказаться): ");
+    switch (readline(buffer)) {
+    case READ_OK:
+      break;
+    case READ_CANCEL:
+      return MENU_OK;
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_INVALID:
+      continue;
     }
 
-    if (status == READ_OK && id > 0 && id < i + 1) {
+    if (buffer[0] == 'Q') {
+      return MENU_OK;
+    }
+
+    if (try_parse_size_t(buffer, &input_num) && input_num > 0 &&
+        input_num < storage->size + 1) {
       break;
     } else {
-      printf("Неправильный ввод.\n");
+      printf("Неправильный ввод. Ожидается индекс контакта в списке");
     }
   }
 
   it = it_begin(storage->list);
   i = 0;
-  Contact* c = NULL;
-  while (it_has_next(it) && i < id) {
+  Contact *c = NULL;
+  while (it_has_next(it) && i < input_num) {
     c = it_next(it);
-    if (strstr(c->lastname, query)) {
+    if (strstr(c->lastname, buffer)) {
       i++;
     }
   }
 
-  printf("%d ?= %d\n", i, id);
-
   it_delete(it);
 
-  if (i != id || c == NULL) {
+  if (i != input_num || c == NULL) {
     printf("Контакт не найден.\n");
     return MENU_OK;
   }
@@ -444,9 +457,7 @@ MenuStatus search_menu() {
   return details_menu(c);
 }
 
-MenuStatus edit_menu(Contact* c) {
-  ReadStatus status = READ_OK;
-
+MenuStatus edit_menu(Contact *c) {
   char keys[U_FIELD_COUNT] = "flnmjp";
   char format[U_FIELD_COUNT] = {0, 0, 0, 0, 0, 0};
   char args[U_FIELD_COUNT][FIELD_SIZE] = {0};
@@ -458,67 +469,67 @@ MenuStatus edit_menu(Contact* c) {
 
   for (size_t i = 0; i < U_FIELD_COUNT - 1; i++) {
     char buffer[FIELD_SIZE];
-    status = readline(prompts[i], buffer);
-    switch (status) {
-      case READ_FAIL:
-        return MENU_FAIL;
-      case READ_OK:
-        format[args_size] = keys[i];
-        strncpy(args[args_size++], buffer, FIELD_SIZE);
-      default:
-        break;
+    printf("%s", prompts[i]);
+    switch (readline(buffer)) {
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_OK:
+      format[args_size] = keys[i];
+      strncpy(args[args_size++], buffer, FIELD_SIZE);
+      args[args_size][FIELD_SIZE - 1] = '\0';
+    default:
+      break;
     }
   }
 
   switch (args_size) {
-    case 1:
-      update_contact(c, format, args[0]);
-      break;
-    case 2:
-      update_contact(c, format, args[0], args[1]);
-      break;
-    case 3:
-      update_contact(c, format, args[0], args[1], args[2]);
-      break;
-    case 4:
-      update_contact(c, format, args[0], args[1], args[2], args[3]);
-      break;
-    case 5:
-      update_contact(c, format, args[0], args[1], args[2], args[3], args[4]);
-      break;
-    case 6:
-      update_contact(c, format, args[0], args[1], args[2], args[3], args[4],
-                     args[5]);
-      break;
+  case 1:
+    update_contact(c, format, args[0]);
+    break;
+  case 2:
+    update_contact(c, format, args[0], args[1]);
+    break;
+  case 3:
+    update_contact(c, format, args[0], args[1], args[2]);
+    break;
+  case 4:
+    update_contact(c, format, args[0], args[1], args[2], args[3]);
+    break;
+  case 5:
+    update_contact(c, format, args[0], args[1], args[2], args[3], args[4]);
+    break;
+  case 6:
+    update_contact(c, format, args[0], args[1], args[2], args[3], args[4],
+                   args[5]);
+    break;
   }
 
   printf("\n");
   return MENU_OK;
 }
 
-MenuStatus delete_menu(Contact* c) {
-  while (1) {
+MenuStatus delete_menu(Contact *c) {
+  while (true) {
     printf("Вы уверены? [y/n]: ");
-    char opt;
-    ReadStatus status = read_character(&opt);
-
-    switch (status) {
-      case READ_CANCEL:
-        return MENU_OK;
-      case READ_FAIL:
-        return MENU_FAIL;
-      case READ_INVALID:
-        continue;
-      default:
-        break;
+    char buffer[FIELD_SIZE];
+    switch (readline(buffer)) {
+    case READ_CANCEL:
+      return MENU_OK;
+    case READ_FAIL:
+      return MENU_FAIL;
+    case READ_INVALID:
+      continue;
+    default:
+      break;
     }
 
+    char opt = buffer[0];
     switch (opt) {
-      case 'y':
-        remove_contact(storage, c);
-        return MENU_OK;
-      case 'n':
-        return MENU_OK;
+    case 'y':
+      remove_contact(storage, c);
+      return MENU_OK;
+    case 'n':
+      return MENU_OK;
     }
   }
 }

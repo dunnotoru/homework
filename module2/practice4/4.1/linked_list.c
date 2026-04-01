@@ -166,12 +166,12 @@ void* it_remove_current(ListIterator* iterator) {
     return NULL;
   }
 
-  ListNode* cur = iterator->current;
+  ListNode* next = iterator->current->next;
 
   void* value = remove_node(iterator->list, iterator->current);
 
   if (iterator->list->head) {
-    iterator->current = cur->next;
+    iterator->current = next;
   } else {
     iterator->current = NULL;
   }
