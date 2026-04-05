@@ -105,11 +105,12 @@ int list_remove_value(List* list, void* value) {
 
   ListNode* cur = list->head;
   do {
+    ListNode* next = cur->next;
     if (cur->value == value) {
       remove_node(list, cur);
     }
 
-    cur = cur->next;
+    cur = next;
   } while (cur != list->head);
 
   return 1;

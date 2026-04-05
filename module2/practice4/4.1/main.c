@@ -22,7 +22,8 @@ typedef enum MenuStatus {
   MENU_OK = 0,
   MENU_FAIL,
   MENU_INVALID,
-  MENU_QUIT
+  MENU_QUIT,
+  MENU_DELETED
 } MenuStatus;
 
 void print_brief(Contact *contact);
@@ -51,10 +52,11 @@ int main() {
   add_contact(storage, contact);
   add_contact(storage, contact2);
 
-  ListIterator *it;
   while (true) {
     size_t i = 0;
-
+    
+    
+    ListIterator *it;
     it = it_begin(storage->list);
     while (it_has_next(it)) {
       Contact *contact = it_next(it);
@@ -62,6 +64,8 @@ int main() {
       print_brief(contact);
       i++;
     }
+
+    it_delete(it);
 
     printf("[A] Добавить, [M] Подробнее, [S] Поиск, [Q] Завершить\n> ");
     char buffer[FIELD_SIZE];
@@ -80,12 +84,11 @@ int main() {
       return 1;
     }
 
-    if(status == MENU_QUIT) {
+    if (status == MENU_QUIT) {
       break;
     }
   }
 
-  it_delete(it);
   delete_storage(storage);
   return 0;
 }
@@ -147,7 +150,7 @@ ReadStatus readline(char buffer[FIELD_SIZE]) {
     return READ_CANCEL;
   }
 
-  sscanf(buffer, "%s", buffer);
+  buffer[strlen(buffer) - 1] = '\0';
 
   return READ_OK;
 }
@@ -326,6 +329,8 @@ MenuStatus details_menu(Contact *c) {
     case MENU_QUIT:
       return MENU_OK;
     default:
+    case MENU_DELETED:
+      return MENU_OK;
       break;
     }
   }
@@ -380,9 +385,12 @@ MenuStatus select_menu() {
 MenuStatus search_menu() {
   printf("Поиск по фамилии.\n> ");
   char buffer[FIELD_SIZE];
-  while (true) {
-    switch (readline(buffer)) {
+  bool ask = true;
+  while (ask) {
+    ReadStatus retval = readline(buffer);
+    switch (retval) {
     case READ_OK:
+      ask = false;
       break;
     case READ_CANCEL:
       return MENU_OK;
@@ -527,7 +535,8 @@ MenuStatus delete_menu(Contact *c) {
     switch (opt) {
     case 'y':
       remove_contact(storage, c);
-      return MENU_OK;
+      delete_contact(c);
+      return MENU_DELETED;
     case 'n':
       return MENU_OK;
     }
