@@ -1,5 +1,6 @@
 build/*
 test.c
 test
+obsolete/*
 
 

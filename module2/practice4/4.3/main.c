@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "linked_list.h"
 #include "phonebook.h"
 
 #define A_FIELD_COUNT 5

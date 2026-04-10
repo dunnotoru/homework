@@ -1,5 +1,5 @@
 CLFAGS=-fsanitize=leak -fsanitize=address -Wall -Wextra -g
-SRC=main.c phonebook.c linked_list.c
+SRC=main.c phonebook.c binary_tree.c
 
 all:
 	mkdir -p build

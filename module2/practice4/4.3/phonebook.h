@@ -2,7 +2,6 @@
 #define PHONEBOOK_H
 
 #include <stdlib.h>
-#include "linked_list.h"
 
 #define FIELD_SIZE 64
 #define NUMBERS_SIZE 5
