@@ -1,4 +1,4 @@
-CFLAGS=-fsanitize=address -g -Wall -Wextra
+CFLAGS=-g -Wall -Wextra
 SRC=main.c priority_queue.c
 
 build: $(SRC)
