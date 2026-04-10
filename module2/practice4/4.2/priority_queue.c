@@ -27,7 +27,7 @@ void queue_delete(PriorityQueue **queue) {
   }
 
   QueueNode *cur, *prev = NULL;
-  for (cur = (*queue)->head; cur->next != NULL; cur = cur->next) {
+  for (cur = (*queue)->head; cur != NULL; cur = cur->next) {
     free(prev);
 
     prev = cur;
@@ -38,7 +38,7 @@ void queue_delete(PriorityQueue **queue) {
   *queue = NULL;
 }
 
-int queue_push_tail(PriorityQueue *q, void *value, uint8_t priority) {
+int queue_push(PriorityQueue *q, void *value, uint8_t priority) {
   if (value == NULL) {
     return 0;
   }
@@ -48,24 +48,42 @@ int queue_push_tail(PriorityQueue *q, void *value, uint8_t priority) {
   node->priority = priority;
   node->next = NULL;
 
-  QueueNode *cur;
-  for (cur = q->head; cur->next != NULL; cur = cur->next)
-    ;
+  if (q->head == NULL) {
+    q->head = node;
+    return 1;
+  }
 
-  cur->next = node;
+  if (node->priority < q->head->priority) {
+    node->next = q->head;
+    q->head = node;
+    return 1;
+  }
+
+  QueueNode *cur;
+  for (cur = q->head; cur->next != NULL; cur = cur->next) {
+    if (node->priority < cur->next->priority) {
+      node->next = cur->next;
+      cur->next = node;
+      return 1;
+    }
+  }
+
+  if (cur->next == NULL) {
+    cur->next = node;
+  }
 
   return 1;
 }
 
 static void *queue_pop(PriorityQueue *queue, uint8_t priority,
                        int (*cmp)(uint8_t, uint8_t)) {
-  if (queue == NULL) {
+  if (queue == NULL || queue->head == NULL) {
     return NULL;
   }
 
   void *value = NULL;
   QueueNode *cur, *prev = NULL;
-  for (cur = queue->head; cur->next != NULL; cur = cur->next) {
+  for (cur = queue->head; cur != NULL; cur = cur->next) {
     if (cmp(cur->priority, priority)) {
       value = cur->value;
       break;
@@ -92,6 +110,8 @@ static void *queue_pop(PriorityQueue *queue, uint8_t priority,
 
 static int eq(uint8_t left, uint8_t right) { return left == right; }
 static int ge(uint8_t left, uint8_t right) { return left >= right; }
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static int always_true(uint8_t left, uint8_t right) { return 1; }
 
 void *queue_pop_eq(PriorityQueue *queue, uint8_t priority) {
