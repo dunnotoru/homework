@@ -34,6 +34,7 @@ int main() {
     printf("[3] Извлечь значение с приоритетом не меньше указанного.\n");
     printf("[4] Извлечь первое значение в очереди.\n");
     printf("[5] Вывести содержимое очереди.\n");
+    printf("[Q] Завершить.\n");
 
     char buffer[BUFFER_SIZE];
     printf("> ");
@@ -42,8 +43,11 @@ int main() {
       perror("Couldn't read input");
       exit(1);
     }
-
     buffer[strcspn(buffer, "\r\n")] = '\0';
+    if (strlen(buffer) == 1 && buffer[0] == 'Q') {
+      break;
+    }
+
     char *endptr;
     int opt = strtol(buffer, &endptr, 10);
     if (*endptr != '\0' || opt < 1 || opt > 5) {
