@@ -7,6 +7,8 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
+#define PROC_ENTRY_NAME "hello_entry"
+
 int len, temp;
 char *msg;
 
@@ -15,7 +17,7 @@ static ssize_t read_proc(struct file *filp, char *buf, size_t count,
   if (count > temp) {
     count = temp;
   }
-  
+
   temp = temp - count;
   unsigned long bytes_copied = copy_to_user(buf, msg, count);
   if (bytes_copied != 0) {
@@ -25,7 +27,7 @@ static ssize_t read_proc(struct file *filp, char *buf, size_t count,
   if (count == 0) {
     temp = len;
   }
-  
+
   return count;
 }
 
@@ -46,9 +48,9 @@ static const struct proc_ops proc_fops = {
     .proc_write = write_proc,
 };
 
-static void
-create_new_proc_entry(void) { // use of void for no arguments is compulsory now
-  proc_create("proc", 0, NULL, &proc_fops);
+static void create_new_proc_entry(void) {
+  // use of void for no arguments is compulsory now
+  proc_create(PROC_ENTRY_NAME, 0, NULL, &proc_fops);
   msg = kmalloc(10 * sizeof(char), GFP_KERNEL);
 }
 
@@ -58,7 +60,7 @@ static int proc_init(void) {
 }
 
 static void proc_cleanup(void) {
-  remove_proc_entry("hello", NULL);
+  remove_proc_entry(PROC_ENTRY_NAME, NULL);
   kfree(msg);
 }
 

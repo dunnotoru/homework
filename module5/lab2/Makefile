@@ -1,4 +1,4 @@
-obj-m += proc-module.o
+obj-m += proc_module.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
